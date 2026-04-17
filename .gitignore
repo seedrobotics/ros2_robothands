@@ -1,0 +1,70 @@
+# =========================
+# ROS 2 / colcon workspace
+# =========================
+build/
+install/
+log/
+
+# If you use colcon defaults in subfolders
+**/build/
+**/install/
+**/log/
+
+# ROS 2 generated / runtime files
+*.bag
+*.bag.active
+*.db3
+*.sqlite3
+*.mcap
+
+QUICKSTART.md
+SETUP.md
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+.venv/
+venv/
+ENV/
+.env
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# =========================
+# CMake / ament / general build
+# =========================
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# =========================
+# IDEs / editors
+# =========================
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Optional: keep empty dirs (if you use .keep files)
+# =========================
+# !**/.keep

@@ -1,0 +1,19 @@
+# ROS 2 parameter file for the RH8D Right Hand controller.
+# The top-level key must match the node name declared in hand_handle_node.py.
+hand_handle_node:
+  ros__parameters:
+    baudrate: 1000000
+    port: "/dev/ttyUSB0"
+    frequency: 20
+    light_mode: false
+    prefix: "R_"
+    joint_mapping:
+      r_main_board: 30
+      r_w_rotation: 31
+      r_w_adduction: 32
+      r_w_flexion: 33
+      r_th_adduction: 34
+      r_th_flexion: 35
+      r_ix_flexion: 36
+      r_middle_flexion: 37
+      r_ring_ltl_flexion: 38

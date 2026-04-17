@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>dynamixel_sdk</name>
+  <version>3.7.51</version>
+  <description>
+    ROBOTIS Dynamixel SDK Python wrapper for ROS 2. Bundled local copy (v3.7.51)
+    kept because the official ros-jazzy-dynamixel-sdk apt package is C++ only and
+    does not install Python bindings.
+  </description>
+  <maintainer email="willson@robotis.com">Will Son</maintainer>
+  <license>Apache 2.0</license>
+  <url type="website">https://emanual.robotis.com/docs/en/software/dynamixel/dynamixel_sdk/overview/</url>
+  <url type="repository">https://github.com/ROBOTIS-GIT/DynamixelSDK</url>
+  <author email="kkjong@robotis.com">Gilbert</author>
+  <author email="zerom@robotis.com">Zerom</author>
+  <author email="thlim@robotis.com">Darby Lim</author>
+  <author>Leon</author>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>python3-serial</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

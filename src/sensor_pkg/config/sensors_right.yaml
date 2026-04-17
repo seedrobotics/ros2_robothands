@@ -1,0 +1,5 @@
+/**:
+  ros__parameters:
+    port: "/dev/ttyUSB1"
+    hand_polarity: "R_"
+    sensor_number: 5
