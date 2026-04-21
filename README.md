@@ -1,6 +1,7 @@
 ########################################################
 
-Disclaimer: This ROS2 Version of the Robothands Repo is usable, but still in development.\n
+Disclaimer: This ROS2 Version of the Robothands Repo is usable, but still in development.
+
 Please Report any bugs you might encounter.
 
 ########################################################
