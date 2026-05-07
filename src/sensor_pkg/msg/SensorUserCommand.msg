@@ -1,9 +1,0 @@
-bool calibrate
-bool setepoch
-string epoch_sec
-string epoch_msec
-bool diagnosis_request
-bool set_frequency
-int8 frequency
-bool raw_string
-string raw

@@ -68,3 +68,8 @@ Thumbs.db
 # Optional: keep empty dirs (if you use .keep files)
 # =========================
 # !**/.keep
+
+
+src/seed_robotics/scripts/aruco_multicam_pose_ros2.py
+src/seed_robotics/scripts/aruco_wrist_pose.py
+src/seed_robotics/scripts/glove_ros2_node.py

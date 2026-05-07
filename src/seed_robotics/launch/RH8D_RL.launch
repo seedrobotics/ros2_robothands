@@ -5,13 +5,13 @@
       <rosparam file="$(find seed_robotics)/config/RH8D_RL.yaml" />
     </node>
 <!-- Uncomment this if you want to use the left hand sensors. WARN : Remember to edit ../config/sensors_left.yaml file
-    <node pkg="sensor_pkg" name="seed_fts3_left" type="read_publish_sensor_node.py" output="screen">
-    	<rosparam file="$(find sensor_pkg)/config/sensors_left.yaml" />
+    <node pkg="ros2_fts" name="seed_fts3_left" type="read_publish_sensor_node.py" output="screen">
+    	<rosparam file="$(find ros2_fts)/config/sensors_left.yaml" />
     </node>
 -->
 <!-- Uncomment this if you want to use the right hand sensors. WARN : Remember to edit ../config/sensors_right.yaml file
-    <node pkg="sensor_pkg" name="seed_fts3_right" type="read_publish_sensor_node.py" output="screen">
-    	<rosparam file="$(find sensor_pkg)/config/sensors_right.yaml" />
+    <node pkg="ros2_fts" name="seed_fts3_right" type="read_publish_sensor_node.py" output="screen">
+    	<rosparam file="$(find ros2_fts)/config/sensors_right.yaml" />
     </node>
 -->
 </launch>

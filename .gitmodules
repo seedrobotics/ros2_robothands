@@ -1,0 +1,3 @@
+[submodule "src/ros2_fts"]
+	path = src/ros2_fts
+	url = git@github.com:seedrobotics/ros2_fts.git

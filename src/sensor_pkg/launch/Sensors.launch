@@ -1,8 +1,0 @@
-<launch>
-  <arg name="node_name" default="seed_fts3_right"/>
-  <arg name="config_file" default="$(find-pkg-share sensor_pkg)/config/sensors_right.yaml"/>
-
-  <node pkg="sensor_pkg" exec="read_publish_sensor_node.py" name="$(var node_name)" output="screen">
-    <param from="$(var config_file)"/>
-  </node>
-</launch>

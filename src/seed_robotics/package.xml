@@ -4,7 +4,7 @@
   <name>seed_robotics</name>
   <version>0.2.0</version>
   <description>RH8D robotic hand controller for ROS 2 Jazzy</description>
-  <maintainer email="lucas.combe@gmail.com">lucas</maintainer>
+  <maintainer email="lennart@seedrobotics.com">lucas</maintainer>
   <license>BSD</license>
   <author email="lucas.combe@gmail.com">Lucas Combe</author>
 
@@ -16,6 +16,8 @@
   <depend>dynamixel_sdk</depend>
 
   <exec_depend>rosidl_default_runtime</exec_depend>
+  <exec_depend>python3-serial</exec_depend>
+  <exec_depend>ros2_fts</exec_depend>
 
   <member_of_group>rosidl_interface_packages</member_of_group>
 

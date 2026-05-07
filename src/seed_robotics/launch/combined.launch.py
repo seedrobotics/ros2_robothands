@@ -37,7 +37,7 @@ def generate_launch_description():
     # Sensor launch file (conditional)
     sensor_launch = IncludeLaunchDescription(
         PathJoinSubstitution([
-            FindPackageShare('sensor_pkg'),
+            FindPackageShare('ros2_fts'),
             'launch',
             'Sensors.launch.py',
         ]),
