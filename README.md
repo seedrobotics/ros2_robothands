@@ -7,22 +7,14 @@ Please Report any bugs you might encounter.
 ########################################################
 
 
-#################### ROS2_ROBOTHANDS ####################
-########################################################
+# Install
 
-#################### PROJECT DESCRIPTION ###############
-########################################################
+Clone Repo with submodules via https or ssh:
+``` bash
+git clone --recurse-submodules https://github.com/seedrobotics/ros2_robothands.git
+git clone --recurse-submodules git@github.com:seedrobotics/ros2_robothands.git
 
-This project includes 2 custom ROS2 packages to ease the use of Seed Robotics products with ROS2.
-
-The first package is named "seed_robotics". It allows the user to communicate with a Seed Robotics robotic hand. Communication includes continuous reading in motors memory and making these informations available using ROS messages. This package also allows the user to write to the motors using ROS messages, the user will be able to change the position and the speed of several motors at the same time. It will also be possible to change the stiffness of a motor, to clear its hardware error and to change its shutdown conditions. The instructions for the use of this package will follow. These communications can be done by the user either using command lines, or using Python script (using the rospy library) or CPP project (using rocpp library). There are examples on how to use these different features using python scripts in the src/seed_robotics/user_samples folder. These samples will be explained later. Note that this package allows a  maximum working frequency of 50Hz.
-
-The second package is named "sensor_pkg". It eases the communication with Seed Robotics FTS3 and FTS1 pressure sensors using ROS2. The sensor_pkg can also be used alone if needed. Its features are the realtime reading of informations sent by the sensor through ROS messages. The sensor_pkg also allows the user to send command to the sensors, either via command lines or using Python script (using the rospy library) or CPP project (using rocpp library). There are examples on how to use these different features using python scripts in the src/sensor_pkg/user_example folder. These samples will be explained later.
-
-There also is a 3rd package in the src/ folder, that is the dynamixel_sdk package which is a library on which the "seed_robotics" package relies.
-
-######################## INSTALLATION ##################
-########################################################
+```
 
 In order to work with this package, you must intall ROS2 (tested with ROS2 Jazzy Jalisco).
 Please follow the instructions on the ROS Wiki website here https://docs.ros.org/en/jazzy/Installation.html. Please install the desktop-full version.
@@ -51,11 +43,21 @@ In order to make the "seed_robotics" package to work at 50Hz, you must change th
 "sudo gedit /sys/bus/usb-serial/devices/$(YOUR_SERIAL_PORT)/latency_timer" And change the value in the file to 1.
 
 
-Now you should be able to work with the ROS Packages "seed_robotics" and "sensor_pkg".
+Now you should be able to work with the ROS Packages "seed_robotics" and "ros2_fts".
 
-############### LAUNCHING THE PACKAGES #################
-########################################################
 
+# PROJECT DESCRIPTION 
+This project includes 2 custom ROS2 packages to ease the use of Seed Robotics products with ROS2.
+
+The first package is named "seed_robotics". It allows the user to communicate with a Seed Robotics robotic hand. Communication includes continuous reading in motors memory and making these informations available using ROS messages. This package also allows the user to write to the motors using ROS messages, the user will be able to change the position and the speed of several motors at the same time. It will also be possible to change the stiffness of a motor, to clear its hardware error and to change its shutdown conditions. The instructions for the use of this package will follow. These communications can be done by the user either using command lines, or using Python script (using the rospy library) or CPP project (using rocpp library). There are examples on how to use these different features using python scripts in the src/seed_robotics/user_samples folder. These samples will be explained later. Note that this package allows a  maximum working frequency of 50Hz.
+
+The second package is named "sensor_pkg". It eases the communication with Seed Robotics FTS3 and FTS1 pressure sensors using ROS2. The sensor_pkg can also be used alone if needed. Its features are the realtime reading of informations sent by the sensor through ROS messages. The sensor_pkg also allows the user to send command to the sensors, either via command lines or using Python script (using the rospy library) or CPP project (using rocpp library). There are examples on how to use these different features using python scripts in the src/sensor_pkg/user_example folder. These samples will be explained later.
+
+There also is a 3rd package in the src/ folder, that is the dynamixel_sdk package which is a library on which the "seed_robotics" package relies.
+
+
+
+# LAUNCHING THE PACKAGES 
 To use these packages in the correct way, you must use the "roslaunch" command line.
 In the seed_robotics package, there are 4 different launchfiles. You can find them in the /src/seed_robotics/launch/ folder.
 Each launchfile have the name "RH8D_L/R/RL.launch". The number depends on the hand model you're using. The "R/L/RL" means either "Right", "Left" or "Right and Left". As you will see, these launchfiles include a parameter called "prefix" that either as the value "R_", "L_" or "RL_". This prefix is used afterwards to name the ROS Topics accordingly. You will have more informations on the ROS Topic Names and message structures in the SEED_ROBOTICS MESSAGE STRUCTURE section of this document.
@@ -88,8 +90,7 @@ If you are using a single RH8D Right hand, then after building the package, sour
 EXAMPLE 2 :
 If you just want to use the sensor_pkg features, then after building the package, sourcing your terminal tab and editing the /src/sensor_pkg/config/sensors_right/left.yaml file, type the command line : "roslaunch sensor_pkg Sensors.launch"
 
-######################## TROUBLESHOOTING ######################
-###############################################################
+# TROUBLESHOOTING
 
 If you have trouble with permissions on serial port (for example if you cannot open a serial port on GTKTerm), you can solve this issue by adding yourself to the dialout group. To do so, open a terminal and type :
 
@@ -97,50 +98,9 @@ sudo usermod -a -G dialout $USER
 
 Then logout and log back for the changes to take effect.
 
-################# SENSOR_PKG FEATURES #########################
-###############################################################
 
-This package features are the following :
-  - Reading sensor values in cartesian coordinates through ROS messages (AllSensors messages)
-  - Reading sensor values in spherical coordinates through ROS messages (AllSensors messages)
-  - Sending commands to the sensors through ROS messages (sensor_user_command messages)
 
-The use of the sensor_user_command messages will be done in the next section.
-
-################## SENSOR_PKG MESSAGE STRUCTURE################
-###############################################################
-
-Here is the structure of the ROS messages used in this package
-![plot](./docImages/Sensor_messages.png)
-
-If you want to read informations about the sensors, then you must code a Node that Subscribes to the "R_AllSensors" Topic if you are using a Right Hand, or to the "L_AllSensors" Topic if you use a Left Hand. There are user samples that show how to do so.
-
-If you want to send commands to the sensor, then you must code a Node that Publishes to the "R/L_sensor_user_command" Topic (R or L still depends if you are using a Right or Left hand). Then, create an instance of the sensor_user_command class as done in the user_samples 3 and 4. Here is an explanation of the sensor_user_command fields :
-  - To calibrate the sensor, set the "calibrate" value to "true"
-  - To set sensors epoch : set the "setepoch" value to "true", the "epoch_sec" value to the epoch's seconds you want and the "epoch_msec" value to the epochs milliseconds you want.
-  - To send a diagnosis request, set the "diagnosis_request" value to "true". The answer will be saved in ROS logs
-  - To change frequency, set the "set_frequency" value to "true" and the "frequency" value to the frequency you want between 1 and 50
-  - To send a custom command, set the "raw_string" value to "true" and the "raw" value to the command you want to send. This is usually a debug feature.
-
-################## USER SAMPLES FOR SENSOR_PKG ################
-###############################################################
-
-As said, there are 4 user code samples for you to have to examples on how to interact with the sensor_pkg package.
-Each one of them initialize a ROS Node to communicate with the relevant Topic.
-These examples are located in the src/sensor_pkg/user_example folder.
-
-The first one is user_sample_1_read_values.py. This script first sends a command to calibrate the sensors. Then it gets data from the sensors about the force on the X, Y and Z axis and display them on the terminal as they are received.
-
-The second one is user_sample_2_abs_pitch_yaw.py. This script does the same as the first one, but instead of using the cartesian coordinates data, it uses the spherical coordinates data (abs, yaw, pitch).
-
-The third one is user_sample_3_setfreq_calibrate.py. This script sends a command to the sensor in order to calibrate them and set the output frequency to 20Hz.
-
-The fourth one is user_sample_4_diagnosis_request.py. This script simply sends a diagnosis request to the sensor.
-
-The best way learn how to use the SENSOR_PKG is to play a bit with these samples and understand how to interact with the sensors data
-
-################# SEED_ROBOTICS FEATURES ######################
-###############################################################
+# SEED_ROBOTICS FEATURES 
 
 This package is the ROS2 Package used for the control of the robotic hands from Seed Robotics.
 
@@ -157,8 +117,7 @@ Joints names can be modified in the YAML config file associated to the launchfil
 
 About the stiffness : It is an integer value that must be between 1 and 9. Default stiffness is 8. Please note that the joints behavior on a low stiffness will imply some overshoot.
 
-################## SEED_ROBOTICS MESSAGE STRUCTURE#############
-###############################################################
+# SEED_ROBOTICS MESSAGE STRUCTURE
 
 The ROS message structure that stores information about the joints and the main boards is the following :
 
@@ -194,8 +153,7 @@ The JointListSetStiffness message have a "joints" attribute that is a list of Se
 - Send the JointListSetStiffness message.
 There is an example on how to do it in the user sample 4.
 
-################## USER SAMPLES FOR SEED_ROBOTICS #############
-###############################################################
+# USER SAMPLES 
 
 As it has been said, there are several user samples that are available for you to see how to use that package.
 These user samples are in the src/seed_robotics/user_samples folder.
