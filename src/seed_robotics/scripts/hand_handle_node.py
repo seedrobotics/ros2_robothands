@@ -89,7 +89,6 @@ PROTOCOL_VERSION            = 2.0
 TORQUE_ENABLE               = 1
 TORQUE_DISABLE              = 0
 
-
 # ── Helper data classes ───────────────────────────────────────────────────────
 
 class _Security:
