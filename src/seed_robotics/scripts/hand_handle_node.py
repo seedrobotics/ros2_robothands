@@ -6,7 +6,8 @@
 
 import math
 import time
-
+import signal
+import platform
 import rclpy
 from rclpy.node import Node
 
@@ -23,6 +24,8 @@ from seed_robotics.msg import (
     ClearHWError,
     JointListSetStiffness,
     SetShutdownCond,
+    AllJointsNorm, LoneJointNorm,
+    JointListSetSpeedPosNorm,
 )
 
 # ── Control-table addresses ───────────────────────────────────────────────────
@@ -88,6 +91,14 @@ LEN_SYNC_READ_MB            = 8
 PROTOCOL_VERSION            = 2.0
 TORQUE_ENABLE               = 1
 TORQUE_DISABLE              = 0
+
+# ── Normalized mode ───────────────────────────────────────────────────────────
+# Wrist joints (name contains '_w_') are normalized to radians in this range;
+# finger joints are normalized to closedness in [0.0, 1.0].
+_WRIST_LOWER = -0.7854
+_WRIST_UPPER =  0.7854
+_FINGER_LOWER = 0.0
+_FINGER_UPPER = 1.0
 
 # ── Helper data classes ───────────────────────────────────────────────────────
 
@@ -206,9 +217,19 @@ class HandControllerNode(Node):
         self.BAUDRATE    = _get('baudrate', 1000000)
         self.DEVICENAME  = _get('port', '/dev/ttyUSB0')
         self.FREQUENCY   = _get('frequency', 20)
+        self.NORMALIZED_MODE = _get('normalized_mode', False)
 
         joint_params = self.get_parameters_by_prefix('joint_mapping')
         self.joint_dict = {k: v.value for k, v in joint_params.items()}
+
+        # Per-joint raw-step calibration for normalized mode.
+        # YAML shape:  joint_limits: { <joint>: { pos_min, pos_max, speed_max } }
+        # get_parameters_by_prefix flattens nested keys as "<joint>.<field>".
+        self.joint_limits = {}
+        for key, param in self.get_parameters_by_prefix('joint_limits').items():
+            jname, _, field = key.partition('.')
+            self.joint_limits.setdefault(jname, {})[field] = param.value
+        self._missing_limit_warned = set()
 
         if not self.joint_dict:
             self.get_logger().error(
@@ -218,9 +239,14 @@ class HandControllerNode(Node):
             self.get_logger().info('joint_mapping: %s' % str(self.joint_dict))
 
         self.get_logger().info(
-            'baudrate=%d  port=%s  freq=%d  light_mode=%s  prefix="%s"' %
+            'baudrate=%d  port=%s  freq=%d  light_mode=%s  prefix="%s"  normalized_mode=%s' %
             (self.BAUDRATE, self.DEVICENAME, self.FREQUENCY,
-             self.LIGHT_MODE, self.PREFIX))
+             self.LIGHT_MODE, self.PREFIX, self.NORMALIZED_MODE))
+
+        if self.NORMALIZED_MODE and not self.joint_limits:
+            self.get_logger().error(
+                'normalized_mode is on but no joint_limits found in parameters — '
+                'normalized values will fall back to raw steps')
 
         self._LEN_SYNC_READ = LEN_SYNC_READ_LIGHT if self.LIGHT_MODE else LEN_SYNC_READ_FULL
         self.PERIOD_MS = 1000.0 / self.FREQUENCY
@@ -238,6 +264,18 @@ class HandControllerNode(Node):
             self.get_logger().fatal('Failed to set baudrate %d' % self.BAUDRATE)
             raise SystemExit(1)
         self.get_logger().info('Baudrate set: %d' % self.BAUDRATE)
+
+        #Claim ownership of ther serial port
+        if platform.system() == "Windows":
+            return
+        try:
+            import fcntl
+            import termios
+            ser_name = getattr(self._port.ser, "port", "?")
+            fcntl.ioctl(self._port.ser.fileno(), termios.TIOCEXCL)
+            print(f"Claimed exclusive access (TIOCEXCL) on {ser_name}")
+        except Exception as exc:
+            print(f"Warning: could not claim exclusive access on {ser_name}: {exc}")
 
     # ── Dynamixel group-sync objects ──────────────────────────────────────────
 
@@ -261,6 +299,19 @@ class HandControllerNode(Node):
         self.create_subscription(ClearHWError,         P + 'clear_error',      self._cb_clear_error,  10)
         self.create_subscription(JointListSetStiffness, P + 'stiffness',       self._cb_stiffness,    10)
         self.create_subscription(SetShutdownCond,      P + 'shutdown_condition', self._cb_shutdown,   10)
+
+        # Normalized-mode topics (only created when the mode is enabled).
+        self._pub_joints_norm = None
+        if self.NORMALIZED_MODE:
+            self._pub_joints_norm = self.create_publisher(
+                AllJointsNorm, P + 'Joints_normalized', 10)
+            self.create_subscription(
+                JointListSetSpeedPosNorm, P + 'speed_position_normalized',
+                self._cb_speed_pos_norm, 10)
+            self.get_logger().info(
+                'Normalized mode ON — publishing %sJoints_normalized, '
+                'listening on %sspeed_position_normalized'
+                % (P, P))
 
         self._flags = _Flags()
         self._sp_ids:    list = []
@@ -359,6 +410,9 @@ class HandControllerNode(Node):
         self._all_joints    = AllJoints()
         self._lone_mbs      = [LoneMainBoard() for _ in self._mb_ids]
         self._all_mbs       = AllMainBoards()
+        if self.NORMALIZED_MODE:
+            self._lone_joints_norm = [LoneJointNorm() for _ in self._joint_ids]
+            self._all_joints_norm  = AllJointsNorm()
 
     # ── Low-level read helpers ────────────────────────────────────────────────
 
@@ -387,6 +441,63 @@ class HandControllerNode(Node):
                 'No mapping for joint "%s". '
                 'Ignore if running 2 hands on different ports.' % name)
             return 'None'
+
+    # ── Normalization helpers ─────────────────────────────────────────────────
+
+    @staticmethod
+    def _is_wrist(name: str) -> bool:
+        return '_w_' in name
+
+    def _norm_range(self, name: str):
+        if self._is_wrist(name):
+            return _WRIST_LOWER, _WRIST_UPPER
+        return _FINGER_LOWER, _FINGER_UPPER
+
+    def _lim(self, name: str):
+        """Calibration dict for a joint, or None (warned once) if absent."""
+        lim = self.joint_limits.get(name)
+        if lim is None and name not in self._missing_limit_warned:
+            self._missing_limit_warned.add(name)
+            self.get_logger().warn(
+                'No joint_limits for "%s" — normalized values pass through as raw' % name)
+        return lim
+
+    def _pos_to_norm(self, name: str, raw: int) -> float:
+        lim = self._lim(name)
+        if not lim:
+            return float(raw)
+        lo, hi = self._norm_range(name)
+        pmin, pmax = lim['pos_min'], lim['pos_max']
+        if pmax == pmin:
+            return lo
+        frac = (raw - pmin) / (pmax - pmin)
+        return lo + frac * (hi - lo)
+
+    def _norm_to_pos(self, name: str, val: float) -> int:
+        lim = self._lim(name)
+        if not lim:
+            return int(round(val))
+        lo, hi = self._norm_range(name)
+        pmin, pmax = lim['pos_min'], lim['pos_max']
+        frac = 0.0 if hi == lo else (val - lo) / (hi - lo)
+        raw = pmin + frac * (pmax - pmin)
+        raw = max(min(pmin, pmax), min(max(pmin, pmax), raw))   # clamp to raw range
+        return int(round(raw))
+
+    def _speed_to_norm(self, name: str, raw: int) -> float:
+        """Raw speed → signed fraction of max raw speed, clamped to [-1, 1]."""
+        lim = self._lim(name)
+        if not lim or not lim.get('speed_max'):
+            return float(raw)
+        frac = raw / lim['speed_max']
+        return max(-1.0, min(1.0, frac))
+
+    def _norm_to_speed(self, name: str, val: float) -> int:
+        """Fraction in [0, 1] → raw speed. Caller handles the keep-last sentinel."""
+        lim = self._lim(name)
+        if not lim or not lim.get('speed_max'):
+            return int(round(val))
+        return int(round(max(0.0, min(1.0, val)) * lim['speed_max']))
 
     # ── Stiffness → PID helper ────────────────────────────────────────────────
 
@@ -487,17 +598,36 @@ class HandControllerNode(Node):
         self._flags.WRITE_STIFFNESS = True
 
     def _cb_speed_pos(self, msg: JointListSetSpeedPos):
+        self._apply_speed_pos(
+            [(j.name, j.target_pos, j.target_speed) for j in msg.joints])
+
+    def _cb_speed_pos_norm(self, msg: JointListSetSpeedPosNorm):
+        items = []
+        for j in msg.joints:
+            target_pos = self._norm_to_pos(j.name, j.target_pos)
+            if j.target_speed < 0:
+                target_speed = -1                       # keep-last sentinel
+            else:
+                target_speed = self._norm_to_speed(j.name, j.target_speed)
+            items.append((j.name, target_pos, target_speed))
+        self._apply_speed_pos(items)
+
+    def _apply_speed_pos(self, items):
+        """Queue a speed/position write.
+
+        items: iterable of (name, target_pos_raw, target_speed_raw); a negative
+        target speed keeps the joint's last known speed (matches raw behavior).
+        """
         self._gsw_sp.clearParam()
         self._sp_ids.clear(); self._sp_params.clear()
 
-        for joint in msg.joints:
-            dxl_id = self._id(joint.name)
-            self.get_logger().info('speed_pos: "%s" → ID %s' % (joint.name, dxl_id))
+        for name, target_pos, ts in items:
+            dxl_id = self._id(name)
+            self.get_logger().info('speed_pos: "%s" → ID %s' % (name, dxl_id))
             if dxl_id == 'None':
                 return
             self._sp_ids.append(dxl_id)
-            target_pos = joint.target_pos
-            if joint.target_speed < 0:
+            if ts < 0:
                 # Keep the last known speed from the joint state
                 target_speed = 0
                 for lj in self._lone_joints:
@@ -505,7 +635,7 @@ class HandControllerNode(Node):
                         target_speed = lj.target_speed
                         break
             else:
-                target_speed = joint.target_speed
+                target_speed = ts
             self._sp_params.append([
                 DXL_LOBYTE(DXL_LOWORD(target_pos)),
                 DXL_HIBYTE(DXL_LOWORD(target_pos)),
@@ -541,6 +671,19 @@ class HandControllerNode(Node):
         self._all_joints.header.stamp = self.get_clock().now().to_msg()
         self._all_joints.length       = len(self._joint_ids)
         self._all_joints.joints       = self._lone_joints
+
+    def _fill_joints_norm_msg(self):
+        for idx, ljn in enumerate(self._lone_joints_norm):
+            j = self.joints[idx]
+            ljn.name             = j.name
+            ljn.bus_id           = j.bus_id
+            ljn.target_position  = self._pos_to_norm(j.name, j.target_pos)
+            ljn.present_position = self._pos_to_norm(j.name, j.pres_pos)
+            ljn.target_speed     = self._speed_to_norm(j.name, j.target_speed)
+            ljn.present_speed    = self._speed_to_norm(j.name, j.pres_speed)
+        self._all_joints_norm.header.stamp = self.get_clock().now().to_msg()
+        self._all_joints_norm.length       = len(self._joint_ids)
+        self._all_joints_norm.joints       = self._lone_joints_norm
 
     def _fill_mb_msg(self):
         for idx, lmb in enumerate(self._lone_mbs):
@@ -587,6 +730,10 @@ class HandControllerNode(Node):
         # ── 2. Publish joint states ──────────────────────────────────────────
         self._fill_joints_msg()
         self._pub_joints.publish(self._all_joints)
+
+        if self._pub_joints_norm is not None:
+            self._fill_joints_norm_msg()
+            self._pub_joints_norm.publish(self._all_joints_norm)
 
         if self.LIGHT_MODE and time.time_ns() / 1_000_000 > t_end:
             self.get_logger().warn('TIME PERIOD EXCEEDED by %d ms' %
@@ -657,14 +804,31 @@ class HandControllerNode(Node):
     # ── Cleanup ───────────────────────────────────────────────────────────────
 
     def destroy_node(self):
-        self.get_logger().info('Closing port…')
-        self._port.closePort()
+        # Idempotent: rclpy may call destroy_node() more than once, and we want
+        # the serial fd (and its TIOCEXCL lock) released exactly once, safely.
+        if not getattr(self, '_port_closed', False):
+            self._port_closed = True
+            port = getattr(self, '_port', None)
+            ser = getattr(port, 'ser', None) if port is not None else None
+            if ser is not None and getattr(ser, 'is_open', False):
+                self.get_logger().info('Closing port…')
+                try:
+                    port.closePort()
+                except Exception as exc:  # never let cleanup mask the real error
+                    self.get_logger().warning('Error closing port: %s' % exc)
         super().destroy_node()
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 def main(args=None):
+    # ros2 launch stops nodes with SIGTERM, which by default does NOT raise
+    # KeyboardInterrupt — so without this the finally below never runs, the
+    # serial fd leaks and its TIOCEXCL lock keeps /dev/ttyUSB0 busy on restart.
+    def _on_sigterm(signum, frame):
+        raise KeyboardInterrupt()
+    signal.signal(signal.SIGTERM, _on_sigterm)
+
     rclpy.init(args=args)
     node = HandControllerNode()
     try:
@@ -673,7 +837,8 @@ def main(args=None):
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == '__main__':

@@ -17,4 +17,22 @@ hand_handle_node:
       l_ix_flexion: 46
       l_middle_flexion: 47
       l_ring_ltl_flexion: 48
+    # Normalized mode: publish L_Joints_normalized and accept L_speed_position_normalized.
+    # Off by default; usually enabled via the launch arg (normalized_mode:=true).
+    normalized_mode: false
+    # Per-joint raw-step calibration, used only when normalized_mode is true.
+    #   pos_min / pos_max : raw steps at the two ends of the normalized range
+    #     wrist  ('_w_') -> [-0.7854, 0.7854] rad
+    #     finger         -> [0.0 (open), 1.0 (closed)]
+    #   speed_max : raw speed treated as full scale (|normalized speed| = 1.0)
+    # TODO: replace these PLACEHOLDER numbers with real calibration values.
+    joint_limits:
+      l_w_rotation:       {pos_min: 1024, pos_max: 3072, speed_max: 1023}
+      l_w_adduction:      {pos_min: 1024, pos_max: 3072, speed_max: 1023}
+      l_w_flexion:        {pos_min: 1024, pos_max: 3072, speed_max: 1023}
+      l_th_adduction:     {pos_min: 0,    pos_max: 4095, speed_max: 1023}
+      l_th_flexion:       {pos_min: 0,    pos_max: 4095, speed_max: 1023}
+      l_ix_flexion:       {pos_min: 0,    pos_max: 4095, speed_max: 1023}
+      l_middle_flexion:   {pos_min: 0,    pos_max: 4095, speed_max: 1023}
+      l_ring_ltl_flexion: {pos_min: 0,    pos_max: 4095, speed_max: 1023}
 
