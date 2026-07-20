@@ -54,6 +54,9 @@ class CouplingNode(Node):
         traj_topic = self.declare_parameter(
             'trajectory_topic', 'hand_controller/joint_trajectory').value
         self.tfs = self.declare_parameter('time_from_start', 0.08).value
+        # Commands stay this far inside the joint limits: dartsim pins joints
+        # that park exactly ON a limit (they stay stuck until knocked free).
+        self.margin = self.declare_parameter('limit_margin', 0.03).value
 
         finger = lambda f: [(f'{p}{f}_proximal_joint', 1.57),
                             (f'{p}{f}_medial_joint', 1.57),
@@ -108,8 +111,9 @@ class CouplingNode(Node):
 
     def motor_panel_urdf(self):
         """URDF with one revolute joint per motor axis - slider panel source."""
-        joints = list(self.passthrough.items()) + [
-            (motor, (0.0, sum(u for _, u in chains[0])))
+        m = self.margin
+        joints = [(n, (lo + m, hi - m)) for n, (lo, hi) in self.passthrough.items()] + [
+            (motor, (0.0, sum(u - m for _, u in chains[0])))
             for motor, chains in self.groups.items()]
         parts = ['<robot name="rh8d_motors">', '<link name="motors"/>']
         for name, (lo, hi) in joints:
@@ -144,7 +148,7 @@ class CouplingNode(Node):
         cmds = {}
         remaining = max(0.0, m)
         for joint, upper in chain:
-            cmd = clamp(remaining, 0.0, upper)
+            cmd = clamp(remaining, 0.0, upper - self.margin)
             if self.adaptive and joint in self.meas:
                 achieved = self.meas[joint]
                 blocked = (cmd - achieved > self.tol
@@ -158,7 +162,7 @@ class CouplingNode(Node):
     def tick(self):
         cmds = {}
         for name, (lo, hi) in self.passthrough.items():
-            cmds[name] = clamp(self.motors[name], lo, hi)
+            cmds[name] = clamp(self.motors[name], lo + self.margin, hi - self.margin)
         for motor, chains in self.groups.items():
             for chain in chains:
                 cmds.update(self.solve_chain(chain, self.motors[motor]))
