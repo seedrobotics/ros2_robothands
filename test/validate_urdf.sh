@@ -17,7 +17,7 @@ fi
 
 status=0
 for side in left right; do
-  for mode in mimic sequential independent; do
+  for mode in mimic independent; do
     out="$(mktemp --suffix=.urdf)"
     if xacro "$DIR/urdf/rh8d.urdf.xacro" side:="$side" finger_coupling:="$mode" > "$out" \
         && check_urdf "$out" > /dev/null; then

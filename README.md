@@ -32,7 +32,7 @@ xacro urdf/rh8d.urdf.xacro side:=right use_ros2_control:=false > urdf/rh8d_right
 | Argument | Default | Description |
 |---|---|---|
 | `side` | `left` | `left` / `right`; selects meshes, mirroring, thumb calibration |
-| `finger_coupling` | `mimic` | `mimic` / `sequential` / `independent`, see below |
+| `finger_coupling` | `mimic` | `mimic` / `independent`, see below |
 | `couple_ring_little` | `true` | ring + little finger share one actuator (as on the real hand) |
 | `use_gazebo` | `false` | emit gz-sim sensors, contact params and the gz_ros2_control plugin |
 | `use_ros2_control` | `true` | emit the `<ros2_control>` system block |
@@ -63,7 +63,7 @@ Fixed frames: `*_tool0` (grasp frame), `*_palm_ir` (palm distance sensor),
 
 ## Finger coupling modes
 
-The phalanges of each finger are tendon-driven by a single motor. Three ways
+The phalanges of each finger are tendon-driven by a single motor. Two ways
 to model this:
 
 - **`mimic`** (default): medial and distal phalanges follow the proximal
@@ -71,36 +71,12 @@ to model this:
   (`follower = leader × upper_follower/upper_leader`). 8-DOF command
   interface identical to the real hand. Works with every standard tool
   (joint_state_publisher, ros2_control, gz-sim, Isaac Sim ≥ 4.x mimic import).
-- **`sequential`**: closer to the real closing behavior — phalanges engage
-  *one after another*. A virtual motor joint per tendon
-  (`*_thumb_flexion_joint`, `*_index_flexion_joint`, `*_middle_flexion_joint`,
-  `*_ring_little_flexion_joint`) is the mimic leader; phalanges follow with
-  staggered negative offsets and are held at their limits through their dead
-  zone by the physics engine. Notes:
-  - Follower joints are deliberately **not** listed in the `<ros2_control>`
-    block — gz_ros2_control's own mimic handling ignores offsets (bug present
-    up to at least Jazzy); the constraints are left to the physics engine
-    (URDF `<mimic>` including offsets is converted to SDF by sdformat ≥ 14).
-  - For RViz, `display.launch.py` pipes the joint_state_publisher GUI through
-    `scripts/mimic_joint_clamper.py`, which applies the limit clamping that
-    stock joint_state_publisher does not. Verified working.
-  - **Gazebo status (Harmonic, verified empirically): imperfect.** dartsim
-    (the default engine) drops mimic constraints entirely; the shipped world
-    therefore selects bullet-featherstone, which does enforce them — the
-    drive and proximal/medial sequencing behave correctly, but the limit
-    clamping loses against the stacked constraint on the distal phalanx
-    (it is dragged below its lower limit) and the drive can stall against
-    the constraint fight. For physically accurate sequential closing in
-    Gazebo, use `independent` mode with a coupling controller (planned) or
-    `mimic` mode. In Isaac Sim, PhysX mimic constraints support offsets
-    natively and are the intended path for this mode (verify against your
-    Isaac version).
 - **`independent`**: all hand joints actuated, no mimic tags. Combined with
   the shipped **tendon coupling controller**
   (`scripts/rh8d_coupling_node.py`) this is the most faithful mode: one
   command per real motor, physically correct sequential closing (verified in
   Gazebo: proximal → medial → distal, each engaging only after the previous
-  saturates), and with `adaptive:=true` a contact-aware wrap — when a phalanx
+  saturates - real limits enforced), and with `adaptive:=true` a contact-aware wrap — when a phalanx
   is blocked by an object (large tracking error at near-zero velocity), the
   remaining motor travel flows to the more distal joints, like the real
   tendon. This is the behavior the mimic-based modes structurally cannot
@@ -109,8 +85,8 @@ to model this:
 ### Tendon coupling controller (independent mode)
 
 `rh8d_coupling_node.py` listens on `motor_commands` (sensor_msgs/JointState,
-one entry per motor axis — same names as the `sequential` drive joints plus
-the wrist/abduction pass-throughs) and outputs either a `JointTrajectory` for
+one entry per motor axis: `*_{thumb,index,middle}_flexion_joint`,
+`*_ring_little_flexion_joint`, plus the wrist/abduction pass-throughs) and outputs either a `JointTrajectory` for
 the `hand_controller` (simulation / hardware) or `joint_states` directly
 (RViz demo). Parameters: `prefix`, `couple_ring_little`, `adaptive`,
 `blocked_tolerance` (rad), `blocked_velocity` (rad/s), `rate`, `output`.
@@ -121,7 +97,7 @@ the `hand_controller` (simulation / hardware) or `joint_states` directly
   Command e.g. `ros2 topic pub /motor_commands sensor_msgs/msg/JointState
   "{name: [l_index_flexion_joint], position: [2.0]}"`.
 - RViz: `display.launch.py finger_coupling:=independent` shows one slider
-  per motor (the GUI is fed the sequential variant's description) driving
+  per motor (the GUI is fed a generated motor-panel description) driving
   the full 19-joint model through the coupling map.
 
 ## Gazebo simulation
@@ -143,23 +119,15 @@ sensors and the complete gz joint state (including mimic followers, so RViz
 shows full TF) to ROS. Command the hand via
 `/hand_controller/joint_trajectory`.
 
-**Physics engine note:** only `finger_coupling:=sequential` uses
-`worlds/rh8d_world_bullet.sdf` (bullet-featherstone, the sole engine with
-native mimic-offset constraints). That engine is empirically unstable —
-runtime model insertion (e.g. dropping a shape in from the GUI) can make
-existing articulated models thrash violently, entirely without contact —
-so treat sequential-in-Gazebo as **deprecated**: the engine also oscillates
-against the joint limits even without any object present. For sequential
-closing behavior in simulation always use `finger_coupling:=independent`
-with the coupling controller (dartsim, fully stable, verified) — it produces
-the same one-after-another engagement with correct limits plus the adaptive
-wrap. Sequential mode's real targets are RViz and Isaac Sim.
+**Physics engine note:** the world runs dartsim (Gazebo's default engine).
+It does not support SDF mimic constraints, so mimic-mode follower joints are
+declared state-only in the ros2_control block and enforced by gz_ros2_control.
 
-`motor_gui:=true` works in every mode: in independent(+coupling) mode the
-sliders are the 8 motor axes feeding the coupling node; in mimic/sequential
-(and raw independent) the sliders are the controller's actuated joints,
-routed through `joint_gui_to_trajectory.py`, which learns the joint set from
-the controller automatically.
+`motor_gui:=true` works in both modes: in independent(+coupling) mode the
+sliders are the 8 motor axes feeding the coupling node; in mimic mode (and
+raw independent) the sliders are the controller's actuated joints, routed
+through `joint_gui_to_trajectory.py`, which learns the joint set from the
+controller automatically.
 
 ## Sensors (Gazebo, `use_gazebo:=true`)
 

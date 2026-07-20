@@ -5,9 +5,7 @@
     ros2_control description for the RH8D.
 
     Only the joints that correspond to real actuators get command interfaces;
-    mimic followers are resolved by the simulator (or by the hand firmware on
-    real hardware) and are intentionally NOT listed here, so gz_ros2_control
-    never touches them.
+    mimic followers are declared with state interfaces only (see below).
 
     hardware_plugin: plugin for real hardware; defaults to mock components so
                      the description works out of the box. Replace with the
@@ -78,19 +76,6 @@
         <xacro:if value="${couple}">
           <xacro:rh8d_follower_iface joint="${prefix}little_proximal_joint"/>
         </xacro:if>
-      </xacro:if>
-
-      <xacro:if value="${finger_coupling == 'sequential'}">
-        <xacro:rh8d_joint_iface joint="${prefix}thumb_flexion_joint"/>
-        <xacro:rh8d_joint_iface joint="${prefix}index_flexion_joint"/>
-        <xacro:rh8d_joint_iface joint="${prefix}middle_flexion_joint"/>
-        <xacro:if value="${couple}">
-          <xacro:rh8d_joint_iface joint="${prefix}ring_little_flexion_joint"/>
-        </xacro:if>
-        <xacro:unless value="${couple}">
-          <xacro:rh8d_joint_iface joint="${prefix}ring_flexion_joint"/>
-          <xacro:rh8d_joint_iface joint="${prefix}little_flexion_joint"/>
-        </xacro:unless>
       </xacro:if>
 
       <xacro:if value="${finger_coupling == 'independent'}">

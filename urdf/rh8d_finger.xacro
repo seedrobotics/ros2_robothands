@@ -94,40 +94,14 @@
     </link>
   </xacro:macro>
 
-  <!-- Virtual motor joint used in 'sequential' coupling mode. Represents the
-       actuator position of one flexion tendon; the phalanx joints mimic it
-       with staggered offsets so they engage one after another. -->
-  <xacro:macro name="rh8d_drive_joint" params="prefix name parent upper">
-    <!-- Non-negligible virtual inertia: near-massless links destabilize the
-         featherstone solver and the mimic constraints anchored to this joint. -->
-    <link name="${prefix}${name}_motor">
-      <inertial>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
-        <mass value="0.01"/>
-        <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
-      </inertial>
-    </link>
-    <joint name="${prefix}${name}_joint" type="revolute">
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <parent link="${parent}"/>
-      <child link="${prefix}${name}_motor"/>
-      <axis xyz="0 0 1"/>
-      <limit effort="20" lower="0.0" upper="${upper}" velocity="2"/>
-      <dynamics damping="0.1" friction="0.0"/>
-    </joint>
-  </xacro:macro>
-
   <!--
     One finger (index/middle/ring/little): proximal, medial, distal phalanges
     plus the fingertip sensor pad.
 
-    coupling: 'mimic' | 'sequential' | 'independent'
-    leader:   name of the joint the finger follows.
-              mimic:      ''            -> proximal is the leader (own motor);
-                          '<joint>'     -> whole finger follows that joint
-                                           (little finger following the ring
-                                           proximal joint on the real hand)
-              sequential: '<drive joint>' (required)
+    coupling: 'mimic' | 'independent'
+    leader:   mimic mode only: '' -> proximal is the leader (own motor);
+              '<joint>' -> whole finger follows that joint (little finger
+              following the ring proximal joint on the real hand)
     mount_*:  palm mount origin, already side-mirrored by the caller.
   -->
   <xacro:macro name="rh8d_finger" params="prefix finger mount_xyz mount_rpy coupling leader:=''">
@@ -141,9 +115,6 @@
       <axis xyz="0 0 1"/>
       <limit effort="20" lower="0.0" upper="${finger_prox_upper}" velocity="2"/>
       <dynamics damping="0.02" friction="0.0"/>
-      <xacro:if value="${coupling == 'sequential'}">
-        <mimic joint="${leader}" multiplier="1.0" offset="0.0"/>
-      </xacro:if>
       <xacro:if value="${coupling == 'mimic' and leader != ''}">
         <mimic joint="${leader}" multiplier="1.0" offset="0.0"/>
       </xacro:if>
@@ -159,9 +130,6 @@
       <axis xyz="0 0 1"/>
       <limit effort="20" lower="0.0" upper="${finger_med_upper}" velocity="2"/>
       <dynamics damping="0.01" friction="0.0"/>
-      <xacro:if value="${coupling == 'sequential'}">
-        <mimic joint="${leader}" multiplier="1.0" offset="${-finger_prox_upper}"/>
-      </xacro:if>
       <xacro:if value="${coupling == 'mimic'}">
         <mimic joint="${mimic_base}" multiplier="${finger_med_mult}" offset="0.0"/>
       </xacro:if>
@@ -177,9 +145,6 @@
       <axis xyz="0 0 1"/>
       <limit effort="20" lower="0.0" upper="${finger_dist_upper}" velocity="2"/>
       <dynamics damping="0.001" friction="0.0"/>
-      <xacro:if value="${coupling == 'sequential'}">
-        <mimic joint="${leader}" multiplier="1.0" offset="${-(finger_prox_upper + finger_med_upper)}"/>
-      </xacro:if>
       <xacro:if value="${coupling == 'mimic'}">
         <mimic joint="${mimic_base}" multiplier="${finger_dist_mult}" offset="0.0"/>
       </xacro:if>
@@ -233,9 +198,6 @@
       <axis xyz="0 0 1"/>
       <limit effort="20" lower="0.0" upper="${thumb_prox_upper}" velocity="2"/>
       <dynamics damping="0.01" friction="0.0"/>
-      <xacro:if value="${coupling == 'sequential'}">
-        <mimic joint="${leader}" multiplier="1.0" offset="0.0"/>
-      </xacro:if>
     </joint>
     <link name="${prefix}thumb_proximal">
       <inertial>
@@ -259,9 +221,6 @@
       <axis xyz="0 0 1"/>
       <limit effort="20" lower="0.0" upper="${thumb_med_upper}" velocity="2"/>
       <dynamics damping="0.01" friction="0.0"/>
-      <xacro:if value="${coupling == 'sequential'}">
-        <mimic joint="${leader}" multiplier="1.0" offset="${-thumb_prox_upper}"/>
-      </xacro:if>
       <xacro:if value="${coupling == 'mimic'}">
         <mimic joint="${mimic_base}" multiplier="${thumb_med_mult}" offset="0.0"/>
       </xacro:if>
@@ -300,9 +259,6 @@
       <axis xyz="0 0 1"/>
       <limit effort="20" lower="0.0" upper="${thumb_dist_upper}" velocity="2"/>
       <dynamics damping="0.001" friction="0.0"/>
-      <xacro:if value="${coupling == 'sequential'}">
-        <mimic joint="${leader}" multiplier="1.0" offset="${-(thumb_prox_upper + thumb_med_upper)}"/>
-      </xacro:if>
       <xacro:if value="${coupling == 'mimic'}">
         <mimic joint="${mimic_base}" multiplier="${thumb_dist_mult}" offset="0.0"/>
       </xacro:if>

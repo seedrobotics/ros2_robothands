@@ -1,9 +1,5 @@
 # Controllers for the right RH8D with the default finger_coupling:=mimic
 # (8 actuated joints, matching the real hand's motor layout).
-#
-# For finger_coupling:=sequential replace the finger joints with the virtual
-# motor joints: r_thumb_flexion_joint, r_index_flexion_joint,
-# r_middle_flexion_joint, r_ring_little_flexion_joint.
 controller_manager:
   ros__parameters:
     update_rate: 100

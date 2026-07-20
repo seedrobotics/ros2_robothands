@@ -4,7 +4,7 @@
   <!--
     Standalone RH8D hand.
 
-      xacro rh8d.urdf.xacro side:=left finger_coupling:=mimic
+      xacro rh8d.urdf.xacro side:=left finger_coupling:=mimic|independent
 
     To mount the hand on a robot, include rh8d_macro.xacro (and optionally
     rh8d.gazebo.xacro / rh8d.ros2_control.xacro) and instantiate the macros

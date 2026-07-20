@@ -15,12 +15,11 @@ def generate_launch_description():
     coupling = LaunchConfiguration('finger_coupling')
     pkg = FindPackageShare('rh8d_description')
 
-    # rh8d_controllers_<side>[_sequential|_independent].yaml - the actuated
-    # joint set differs per coupling mode.
+    # rh8d_controllers_<side>[_independent].yaml - the actuated joint set
+    # differs per coupling mode.
     controllers_file = PathJoinSubstitution([pkg, 'config', PythonExpression([
         "'rh8d_controllers_' + '", side, "'",
-        " + {'mimic': '', 'sequential': '_sequential',",
-        "    'independent': '_independent'}['", coupling, "']",
+        " + ('_independent' if '", coupling, "' == 'independent' else '')",
         " + '.yaml'"])])
 
     robot_description = ParameterValue(
@@ -35,19 +34,14 @@ def generate_launch_description():
         ]),
         value_type=str)
 
-    # dartsim world by default (stable contacts and runtime model insertion).
-    # Only 'sequential' needs the bullet-featherstone world for its native
-    # mimic-offset constraints - with that engine's known instabilities.
-    world = PathJoinSubstitution([pkg, 'worlds', PythonExpression([
-        "'rh8d_world_bullet.sdf' if '", coupling, "' == 'sequential'",
-        " else 'rh8d_world.sdf'"])])
+    world = PathJoinSubstitution([pkg, 'worlds', 'rh8d_world.sdf'])
     gz_args = PythonExpression(
         ["('-s ' if '", LaunchConfiguration('headless'), "' == 'true' else '') + '-r -v1 '"])
 
     return LaunchDescription([
         DeclareLaunchArgument('side', default_value='left', choices=['left', 'right']),
         DeclareLaunchArgument('finger_coupling', default_value='mimic',
-                              choices=['mimic', 'sequential', 'independent']),
+                              choices=['mimic', 'independent']),
         DeclareLaunchArgument('couple_ring_little', default_value='true'),
         DeclareLaunchArgument('headless', default_value='false'),
         DeclareLaunchArgument('use_coupling', default_value='true',
@@ -99,7 +93,7 @@ def generate_launch_description():
         # Tendon coupling controller: maps the 8 motor axes onto the 19
         # independent joints with sequential engagement (and optional
         # contact-adaptive wrap). Only meaningful in independent mode.
-        # It also latches the sequential variant's description on
+        # It also latches the generated motor panel description on
         # motor_description for the motor slider GUI.
         Node(package='rh8d_description', executable='rh8d_coupling_node.py',
              condition=IfCondition(PythonExpression(
@@ -109,13 +103,6 @@ def generate_launch_description():
                           'couple_ring_little': LaunchConfiguration('couple_ring_little'),
                           'adaptive': LaunchConfiguration('adaptive'),
                           'output': 'trajectory',
-                          'motor_description': ParameterValue(Command([
-                              FindExecutable(name='xacro'), ' ',
-                              PathJoinSubstitution([pkg, 'urdf', 'rh8d.urdf.xacro']),
-                              ' side:=', side,
-                              ' finger_coupling:=sequential',
-                              ' couple_ring_little:=', LaunchConfiguration('couple_ring_little'),
-                          ]), value_type=str),
                           'use_sim_time': True}]),
 
         # motor_gui:=true - one slider per real motor, driving the physics
@@ -129,8 +116,8 @@ def generate_launch_description():
                   LaunchConfiguration('motor_gui'), "' == 'true'"])),
              parameters=[{'use_sim_time': True}]),
 
-        # motor_gui in the other modes (mimic/sequential, or independent
-        # without the coupling node): sliders for the actuated joints, sent
+        # motor_gui in the other modes (mimic, or independent without the
+        # coupling node): sliders for the actuated joints, sent
         # to the trajectory controller via the gui-to-trajectory bridge,
         # which learns the controller's joint set from controller_state.
         Node(package='joint_state_publisher_gui', executable='joint_state_publisher_gui',

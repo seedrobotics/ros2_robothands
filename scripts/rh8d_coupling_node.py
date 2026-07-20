@@ -23,10 +23,9 @@ Interface
   out: output:=trajectory   -> JointTrajectory on hand_controller/joint_trajectory
        output:=joint_states -> JointState on joint_states (RViz demo, no sim)
 
-If the motor_description parameter is set (a URDF string, typically the
-'sequential' variant of the hand), it is republished latched on
-motor_description so a joint_state_publisher GUI can offer one slider per
-motor.
+A minimal "motor panel" URDF (one revolute joint per motor axis, correct
+travel ranges, no geometry) is generated and latched on motor_description so
+a joint_state_publisher GUI can offer one slider per motor.
 """
 import rclpy
 from rclpy.node import Node
@@ -55,7 +54,6 @@ class CouplingNode(Node):
         traj_topic = self.declare_parameter(
             'trajectory_topic', 'hand_controller/joint_trajectory').value
         self.tfs = self.declare_parameter('time_from_start', 0.15).value
-        motor_description = self.declare_parameter('motor_description', '').value
 
         finger = lambda f: [(f'{p}{f}_proximal_joint', 1.57),
                             (f'{p}{f}_medial_joint', 1.57),
@@ -99,15 +97,30 @@ class CouplingNode(Node):
             self.js_pub = self.create_publisher(JointState, 'joint_states', 10)
             self.traj_pub = None
 
-        if motor_description:
-            qos = QoSProfile(depth=1, durability=DurabilityPolicy.TRANSIENT_LOCAL)
-            self.desc_pub = self.create_publisher(String, 'motor_description', qos)
-            self.desc_pub.publish(String(data=motor_description))
+        qos = QoSProfile(depth=1, durability=DurabilityPolicy.TRANSIENT_LOCAL)
+        self.desc_pub = self.create_publisher(String, 'motor_description', qos)
+        self.desc_pub.publish(String(data=self.motor_panel_urdf()))
 
         self.create_timer(1.0 / rate, self.tick)
         self.get_logger().info(
             f'coupling {len(self.groups)} tendons -> {len(self.out_joints)} joints '
             f'(adaptive={self.adaptive})')
+
+    def motor_panel_urdf(self):
+        """URDF with one revolute joint per motor axis - slider panel source."""
+        joints = list(self.passthrough.items()) + [
+            (motor, (0.0, sum(u for _, u in chains[0])))
+            for motor, chains in self.groups.items()]
+        parts = ['<robot name="rh8d_motors">', '<link name="motors"/>']
+        for name, (lo, hi) in joints:
+            parts += [f'<link name="{name}_pos"/>',
+                      f'<joint name="{name}" type="revolute">',
+                      f'<parent link="motors"/><child link="{name}_pos"/>',
+                      '<axis xyz="0 0 1"/>',
+                      f'<limit lower="{lo}" upper="{hi}" effort="1" velocity="1"/>',
+                      '</joint>']
+        parts.append('</robot>')
+        return '\n'.join(parts)
 
     def on_cmd(self, msg):
         for name, pos in zip(msg.name, msg.position):
