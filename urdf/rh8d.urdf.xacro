@@ -26,7 +26,25 @@
   <xacro:property name="side"   value="$(arg side)"/>
   <xacro:property name="prefix" value="${'l_' if side == 'left' else 'r_'}"/>
 
-  <link name="base_link"/>
+  <!-- For Gazebo the model is anchored to the world and base_link needs mass,
+       otherwise sdformat drops the massless root and orphans the model. -->
+  <xacro:if value="$(arg use_gazebo)">
+    <link name="world"/>
+    <joint name="world_to_base" type="fixed">
+      <parent link="world"/>
+      <child link="base_link"/>
+    </joint>
+    <link name="base_link">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.05"/>
+        <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
+      </inertial>
+    </link>
+  </xacro:if>
+  <xacro:unless value="$(arg use_gazebo)">
+    <link name="base_link"/>
+  </xacro:unless>
 
   <xacro:rh8d prefix="${prefix}" side="${side}" parent="base_link"
               finger_coupling="$(arg finger_coupling)"

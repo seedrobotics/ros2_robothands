@@ -4,7 +4,7 @@ project(rh8d_description)
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY urdf meshes launch rviz config
+  DIRECTORY urdf meshes launch rviz config worlds
   DESTINATION share/${PROJECT_NAME}
 )
 

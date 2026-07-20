@@ -77,14 +77,24 @@ to model this:
   `*_ring_little_flexion_joint`) is the mimic leader; phalanges follow with
   staggered negative offsets and are held at their limits through their dead
   zone by the physics engine. Notes:
-  - In Gazebo the mimic constraints are enforced natively by the physics
-    engine (URDF `<mimic>` including offsets is converted to SDF by
-    sdformat ≥ 14). Follower joints are deliberately **not** listed in the
-    `<ros2_control>` block — gz_ros2_control's own mimic handling ignores
-    offsets (bug present up to at least Jazzy).
+  - Follower joints are deliberately **not** listed in the `<ros2_control>`
+    block — gz_ros2_control's own mimic handling ignores offsets (bug present
+    up to at least Jazzy); the constraints are left to the physics engine
+    (URDF `<mimic>` including offsets is converted to SDF by sdformat ≥ 14).
   - For RViz, `display.launch.py` pipes the joint_state_publisher GUI through
     `scripts/mimic_joint_clamper.py`, which applies the limit clamping that
-    stock joint_state_publisher does not.
+    stock joint_state_publisher does not. Verified working.
+  - **Gazebo status (Harmonic, verified empirically): imperfect.** dartsim
+    (the default engine) drops mimic constraints entirely; the shipped world
+    therefore selects bullet-featherstone, which does enforce them — the
+    drive and proximal/medial sequencing behave correctly, but the limit
+    clamping loses against the stacked constraint on the distal phalanx
+    (it is dragged below its lower limit) and the drive can stall against
+    the constraint fight. For physically accurate sequential closing in
+    Gazebo, use `independent` mode with a coupling controller (planned) or
+    `mimic` mode. In Isaac Sim, PhysX mimic constraints support offsets
+    natively and are the intended path for this mode (verify against your
+    Isaac version).
 - **`independent`**: all 21 hand joints actuated (plus wrist), no coupling.
   For grasping research where contact should interrupt the tendon coupling,
   or as a base for PhysX tendon setups in Isaac Sim.
@@ -92,6 +102,25 @@ to model this:
 None of the mimic modes can represent the adaptive wrap of a real tendon
 (distal phalanges continuing to close when a proximal one is blocked); use
 `independent` plus your own coupling controller or PhysX tendons for that.
+
+## Gazebo simulation
+
+Requires `ros-jazzy-ros-gz` and `ros-jazzy-gz-ros2-control` (intentionally not
+hard dependencies of this package):
+
+```bash
+ros2 launch rh8d_description gazebo.launch.py side:=left finger_coupling:=mimic
+# headless server only: headless:=true
+```
+
+This starts gz-sim Harmonic with `worlds/rh8d_world.sdf` (which selects the
+bullet-featherstone physics engine — the only one supporting mimic
+constraints — and loads the Sensors/ForceTorque systems), spawns the hand
+anchored to the world, activates `joint_state_broadcaster` + `hand_controller`
+(a JointTrajectoryController over the 8 actuator joints), and bridges clock,
+sensors and the complete gz joint state (including mimic followers, so RViz
+shows full TF) to ROS. Command the hand via
+`/hand_controller/joint_trajectory`.
 
 ## Sensors (Gazebo, `use_gazebo:=true`)
 

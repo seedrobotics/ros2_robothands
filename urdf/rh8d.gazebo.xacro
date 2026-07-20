@@ -42,6 +42,15 @@
 
   <xacro:macro name="rh8d_gazebo" params="prefix side">
 
+    <!-- Publishes ALL joint positions (including mimic followers, which are
+         not part of ros2_control) on <world>/model/<name>/joint_state; the
+         shipped bridge configs map it to /joint_states so RViz gets complete
+         TF during simulation. -->
+    <gazebo>
+      <plugin filename="gz-sim-joint-state-publisher-system"
+              name="gz::sim::systems::JointStatePublisher"/>
+    </gazebo>
+
     <xacro:rh8d_link_friction link="${prefix}forearm"/>
     <xacro:rh8d_link_friction link="${prefix}palm_axis"/>
     <xacro:rh8d_link_friction link="${prefix}palm"/>

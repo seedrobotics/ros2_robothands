@@ -98,11 +98,13 @@
        actuator position of one flexion tendon; the phalanx joints mimic it
        with staggered offsets so they engage one after another. -->
   <xacro:macro name="rh8d_drive_joint" params="prefix name parent upper">
+    <!-- Non-negligible virtual inertia: near-massless links destabilize the
+         featherstone solver and the mimic constraints anchored to this joint. -->
     <link name="${prefix}${name}_motor">
       <inertial>
         <origin rpy="0 0 0" xyz="0 0 0"/>
-        <mass value="1.0e-05"/>
-        <inertia ixx="1.0e-09" ixy="0.0" ixz="0.0" iyy="1.0e-09" iyz="0.0" izz="1.0e-09"/>
+        <mass value="0.01"/>
+        <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
       </inertial>
     </link>
     <joint name="${prefix}${name}_joint" type="revolute">
