@@ -5,11 +5,14 @@
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
     </physics>
-    <!-- dartsim (default engine): stable contacts and runtime model insertion.
-         Note: it does NOT support SDF mimic constraints - mimic-mode follower
-         joints are enforced by gz_ros2_control instead, and 'sequential' mode
-         needs the bullet world (rh8d_world_bullet.sdf). -->
-    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <!-- bullet-featherstone: the only gz-physics engine (as of Harmonic) that
+         supports the mimic joint constraints used by the finger coupling.
+         The default dartsim engine silently drops them. -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics">
+      <engine>
+        <filename>gz-physics-bullet-featherstone-plugin</filename>
+      </engine>
+    </plugin>
     <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
     <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
     <!-- Sensors + ForceTorque systems are required for the fingertip

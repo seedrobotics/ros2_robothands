@@ -22,6 +22,19 @@
     </joint>
   </xacro:macro>
 
+  <!-- Mimic follower: state only. ros2_control picks up the URDF <mimic> tag
+       and gz_ros2_control enforces the coupling in simulation - this is what
+       makes 'mimic' mode work on dartsim, which drops SDF mimic constraints.
+       (Offsets are ignored by gz_ros2_control, but 'mimic' mode only uses
+       offset 0 so that is harmless here.) -->
+  <xacro:macro name="rh8d_follower_iface" params="joint">
+    <joint name="${joint}">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </xacro:macro>
+
   <xacro:macro name="rh8d_ros2_control"
                params="name prefix finger_coupling:=mimic couple_ring_little:=true
                        use_gazebo:=false hardware_plugin:='mock_components/GenericSystem'">
@@ -52,6 +65,19 @@
         <xacro:unless value="${couple}">
           <xacro:rh8d_joint_iface joint="${prefix}little_proximal_joint"/>
         </xacro:unless>
+        <xacro:rh8d_follower_iface joint="${prefix}thumb_medial_joint"/>
+        <xacro:rh8d_follower_iface joint="${prefix}thumb_distal_joint"/>
+        <xacro:rh8d_follower_iface joint="${prefix}index_medial_joint"/>
+        <xacro:rh8d_follower_iface joint="${prefix}index_distal_joint"/>
+        <xacro:rh8d_follower_iface joint="${prefix}middle_medial_joint"/>
+        <xacro:rh8d_follower_iface joint="${prefix}middle_distal_joint"/>
+        <xacro:rh8d_follower_iface joint="${prefix}ring_medial_joint"/>
+        <xacro:rh8d_follower_iface joint="${prefix}ring_distal_joint"/>
+        <xacro:rh8d_follower_iface joint="${prefix}little_medial_joint"/>
+        <xacro:rh8d_follower_iface joint="${prefix}little_distal_joint"/>
+        <xacro:if value="${couple}">
+          <xacro:rh8d_follower_iface joint="${prefix}little_proximal_joint"/>
+        </xacro:if>
       </xacro:if>
 
       <xacro:if value="${finger_coupling == 'sequential'}">

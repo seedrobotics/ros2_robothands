@@ -35,7 +35,12 @@ def generate_launch_description():
         ]),
         value_type=str)
 
-    world = PathJoinSubstitution([pkg, 'worlds', 'rh8d_world.sdf'])
+    # dartsim world by default (stable contacts and runtime model insertion).
+    # Only 'sequential' needs the bullet-featherstone world for its native
+    # mimic-offset constraints - with that engine's known instabilities.
+    world = PathJoinSubstitution([pkg, 'worlds', PythonExpression([
+        "'rh8d_world_bullet.sdf' if '", coupling, "' == 'sequential'",
+        " else 'rh8d_world.sdf'"])])
     gz_args = PythonExpression(
         ["('-s ' if '", LaunchConfiguration('headless'), "' == 'true' else '') + '-r -v1 '"])
 

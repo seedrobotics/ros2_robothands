@@ -134,14 +134,23 @@ ros2 launch rh8d_description gazebo.launch.py side:=left finger_coupling:=mimic
 # headless server only: headless:=true
 ```
 
-This starts gz-sim Harmonic with `worlds/rh8d_world.sdf` (which selects the
-bullet-featherstone physics engine — the only one supporting mimic
-constraints — and loads the Sensors/ForceTorque systems), spawns the hand
-anchored to the world, activates `joint_state_broadcaster` + `hand_controller`
-(a JointTrajectoryController over the 8 actuator joints), and bridges clock,
+This starts gz-sim Harmonic with `worlds/rh8d_world.sdf` (dartsim, the
+default engine — mimic-mode followers are enforced by gz_ros2_control, so
+no SDF mimic constraints are needed), spawns the hand anchored to the world,
+activates `joint_state_broadcaster` + `hand_controller` (a
+JointTrajectoryController over the actuated joints), and bridges clock,
 sensors and the complete gz joint state (including mimic followers, so RViz
 shows full TF) to ROS. Command the hand via
 `/hand_controller/joint_trajectory`.
+
+**Physics engine note:** only `finger_coupling:=sequential` uses
+`worlds/rh8d_world_bullet.sdf` (bullet-featherstone, the sole engine with
+native mimic-offset constraints). That engine is empirically unstable —
+runtime model insertion (e.g. dropping a shape in from the GUI) can make
+existing articulated models thrash violently, entirely without contact —
+so treat sequential-in-Gazebo as experimental only. For sequential closing
+behavior in simulation use `finger_coupling:=independent` with the coupling
+controller (dartsim, fully stable, verified).
 
 ## Sensors (Gazebo, `use_gazebo:=true`)
 
