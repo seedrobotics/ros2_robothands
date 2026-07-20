@@ -5,12 +5,17 @@
        parameters, fingertip force_torque sensors and the palm IR distance
        sensor. Include via the rh8d_gazebo macro after instantiating rh8d. -->
 
-  <xacro:macro name="rh8d_link_friction" params="link">
+  <!-- Contact parameters. The original NICOL values (mu 500, kp 1e7, kd 1)
+       were tuned for Gazebo Classic/ODE and cause violent contact explosions
+       in bullet-featherstone (deep-penetration recovery on the very light
+       finger links); realistic friction and a soft, damped contact keep
+       grasping stable. -->
+  <xacro:macro name="rh8d_link_friction" params="link mu:=1.2">
     <gazebo reference="${link}">
-      <mu1>500.0</mu1>
-      <mu2>500.0</mu2>
-      <kp>10000000.0</kp>
-      <kd>1</kd>
+      <mu1>${mu}</mu1>
+      <mu2>${mu}</mu2>
+      <kp>100000.0</kp>
+      <kd>10.0</kd>
       <self_collide>1</self_collide>
     </gazebo>
   </xacro:macro>
@@ -31,7 +36,8 @@
         </force_torque>
       </sensor>
     </gazebo>
-    <xacro:rh8d_link_friction link="${prefix}${finger}_fingertip"/>
+    <!-- rubber sensor pads grip better than the plastic shells -->
+    <xacro:rh8d_link_friction link="${prefix}${finger}_fingertip" mu="1.5"/>
   </xacro:macro>
 
   <xacro:macro name="rh8d_finger_friction" params="prefix finger">
