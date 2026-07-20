@@ -20,7 +20,7 @@
     <parent link="base_link"/>
     <child link="l_forearm"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10" lower="-1.5707963267948966" upper="1.5707963267948966" velocity="3"/>
+    <limit effort="10" lower="-1.5707963267948966" upper="1.5707963267948966" velocity="6"/>
   </joint>
   <link name="l_forearm">
     <inertial>
@@ -53,7 +53,7 @@
     <parent link="l_forearm"/>
     <child link="l_palm_axis"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.7853981633974483" upper="0.7853981633974483" velocity="3"/>
+    <limit effort="30" lower="-0.7853981633974483" upper="0.7853981633974483" velocity="6"/>
     <dynamics damping="1" friction="0.0"/>
   </joint>
   <link name="l_palm_axis">
@@ -75,7 +75,7 @@
     <parent link="l_palm_axis"/>
     <child link="l_palm"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.7853981633974483" upper="0.7853981633974483" velocity="3"/>
+    <limit effort="30" lower="-0.7853981633974483" upper="0.7853981633974483" velocity="6"/>
     <dynamics damping="1" friction="0.0"/>
   </joint>
   <link name="l_palm">
@@ -123,7 +123,7 @@
     <parent link="l_palm"/>
     <child link="l_thumb_base"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.6" upper="0.7853981633974483" velocity="4"/>
+    <limit effort="30" lower="-0.6" upper="0.7853981633974483" velocity="8"/>
     <dynamics damping="0.1" friction="0.0"/>
   </joint>
   <link name="l_thumb_base">
@@ -145,7 +145,7 @@
     <parent link="l_thumb_base"/>
     <child link="l_thumb_proximal"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="0.8" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="0.8" velocity="8"/>
     <dynamics damping="0.01" friction="0.0"/>
   </joint>
   <link name="l_thumb_proximal">
@@ -167,7 +167,7 @@
     <parent link="l_thumb_proximal"/>
     <child link="l_thumb_medial"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.57" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.57" velocity="8"/>
     <dynamics damping="0.01" friction="0.0"/>
     <mimic joint="l_thumb_proximal_joint" multiplier="1.9625" offset="0.0"/>
   </joint>
@@ -202,7 +202,7 @@
     <parent link="l_thumb_medial"/>
     <child link="l_thumb_distal"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="0.4" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="0.4" velocity="8"/>
     <dynamics damping="0.001" friction="0.0"/>
     <mimic joint="l_thumb_proximal_joint" multiplier="0.5" offset="0.0"/>
   </joint>
@@ -256,7 +256,7 @@
     <parent link="l_palm"/>
     <child link="l_index_proximal"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.57" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.57" velocity="8"/>
     <dynamics damping="0.02" friction="0.0"/>
   </joint>
   <link name="l_index_proximal">
@@ -290,7 +290,7 @@
     <parent link="l_index_proximal"/>
     <child link="l_index_medial"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.57" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.57" velocity="8"/>
     <dynamics damping="0.01" friction="0.0"/>
     <mimic joint="l_index_proximal_joint" multiplier="1.0" offset="0.0"/>
   </joint>
@@ -325,7 +325,7 @@
     <parent link="l_index_medial"/>
     <child link="l_index_distal"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.0" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.0" velocity="8"/>
     <dynamics damping="0.001" friction="0.0"/>
     <mimic joint="l_index_proximal_joint" multiplier="0.6369426751592356" offset="0.0"/>
   </joint>
@@ -379,7 +379,7 @@
     <parent link="l_palm"/>
     <child link="l_middle_proximal"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.57" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.57" velocity="8"/>
     <dynamics damping="0.02" friction="0.0"/>
   </joint>
   <link name="l_middle_proximal">
@@ -413,7 +413,7 @@
     <parent link="l_middle_proximal"/>
     <child link="l_middle_medial"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.57" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.57" velocity="8"/>
     <dynamics damping="0.01" friction="0.0"/>
     <mimic joint="l_middle_proximal_joint" multiplier="1.0" offset="0.0"/>
   </joint>
@@ -448,7 +448,7 @@
     <parent link="l_middle_medial"/>
     <child link="l_middle_distal"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.0" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.0" velocity="8"/>
     <dynamics damping="0.001" friction="0.0"/>
     <mimic joint="l_middle_proximal_joint" multiplier="0.6369426751592356" offset="0.0"/>
   </joint>
@@ -502,7 +502,7 @@
     <parent link="l_palm"/>
     <child link="l_ring_proximal"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.57" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.57" velocity="8"/>
     <dynamics damping="0.02" friction="0.0"/>
   </joint>
   <link name="l_ring_proximal">
@@ -536,7 +536,7 @@
     <parent link="l_ring_proximal"/>
     <child link="l_ring_medial"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.57" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.57" velocity="8"/>
     <dynamics damping="0.01" friction="0.0"/>
     <mimic joint="l_ring_proximal_joint" multiplier="1.0" offset="0.0"/>
   </joint>
@@ -571,7 +571,7 @@
     <parent link="l_ring_medial"/>
     <child link="l_ring_distal"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.0" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.0" velocity="8"/>
     <dynamics damping="0.001" friction="0.0"/>
     <mimic joint="l_ring_proximal_joint" multiplier="0.6369426751592356" offset="0.0"/>
   </joint>
@@ -625,7 +625,7 @@
     <parent link="l_palm"/>
     <child link="l_little_proximal"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.57" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.57" velocity="8"/>
     <dynamics damping="0.02" friction="0.0"/>
     <mimic joint="l_ring_proximal_joint" multiplier="1.0" offset="0.0"/>
   </joint>
@@ -660,7 +660,7 @@
     <parent link="l_little_proximal"/>
     <child link="l_little_medial"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.57" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.57" velocity="8"/>
     <dynamics damping="0.01" friction="0.0"/>
     <mimic joint="l_ring_proximal_joint" multiplier="1.0" offset="0.0"/>
   </joint>
@@ -695,7 +695,7 @@
     <parent link="l_little_medial"/>
     <child link="l_little_distal"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30" lower="-0.05" upper="1.0" velocity="4"/>
+    <limit effort="30" lower="-0.05" upper="1.0" velocity="8"/>
     <dynamics damping="0.001" friction="0.0"/>
     <mimic joint="l_ring_proximal_joint" multiplier="0.6369426751592356" offset="0.0"/>
   </joint>

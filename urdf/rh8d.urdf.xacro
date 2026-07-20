@@ -66,6 +66,9 @@
       <gazebo>
         <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
           <parameters>$(arg controllers_file)</parameters>
+          <!-- velocity command = gain * position error * update_rate; the
+               default 0.1 caps joint speeds well below the URDF limits -->
+          <position_proportional_gain>0.3</position_proportional_gain>
         </plugin>
       </gazebo>
     </xacro:if>

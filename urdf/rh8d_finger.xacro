@@ -14,7 +14,7 @@
        effort 20 / velocity 2 left the fingers slow and the thumb prone to
        sticking against the palm until jostled). -->
   <xacro:property name="phalanx_effort"    value="30"/>
-  <xacro:property name="phalanx_velocity"  value="4"/>
+  <xacro:property name="phalanx_velocity"  value="8"/>
   <!-- Slightly negative lower limit: joints parked exactly ON a limit get
        pinned by dartsim's limit constraint and never move (frozen-thumb bug);
        a few degrees of backward slack matches the real tendon fingers and

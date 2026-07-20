@@ -53,7 +53,7 @@ class CouplingNode(Node):
         output = self.declare_parameter('output', 'trajectory').value
         traj_topic = self.declare_parameter(
             'trajectory_topic', 'hand_controller/joint_trajectory').value
-        self.tfs = self.declare_parameter('time_from_start', 0.15).value
+        self.tfs = self.declare_parameter('time_from_start', 0.08).value
 
         finger = lambda f: [(f'{p}{f}_proximal_joint', 1.57),
                             (f'{p}{f}_medial_joint', 1.57),
