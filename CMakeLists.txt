@@ -13,6 +13,7 @@ install(
     scripts/mimic_joint_clamper.py
     scripts/palm_ir_adapter.py
     scripts/rh8d_coupling_node.py
+    scripts/joint_gui_to_trajectory.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

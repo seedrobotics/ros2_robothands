@@ -148,9 +148,18 @@ shows full TF) to ROS. Command the hand via
 native mimic-offset constraints). That engine is empirically unstable —
 runtime model insertion (e.g. dropping a shape in from the GUI) can make
 existing articulated models thrash violently, entirely without contact —
-so treat sequential-in-Gazebo as experimental only. For sequential closing
-behavior in simulation use `finger_coupling:=independent` with the coupling
-controller (dartsim, fully stable, verified).
+so treat sequential-in-Gazebo as **deprecated**: the engine also oscillates
+against the joint limits even without any object present. For sequential
+closing behavior in simulation always use `finger_coupling:=independent`
+with the coupling controller (dartsim, fully stable, verified) — it produces
+the same one-after-another engagement with correct limits plus the adaptive
+wrap. Sequential mode's real targets are RViz and Isaac Sim.
+
+`motor_gui:=true` works in every mode: in independent(+coupling) mode the
+sliders are the 8 motor axes feeding the coupling node; in mimic/sequential
+(and raw independent) the sliders are the controller's actuated joints,
+routed through `joint_gui_to_trajectory.py`, which learns the joint set from
+the controller automatically.
 
 ## Sensors (Gazebo, `use_gazebo:=true`)
 

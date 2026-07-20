@@ -129,6 +129,24 @@ def generate_launch_description():
                   LaunchConfiguration('motor_gui'), "' == 'true'"])),
              parameters=[{'use_sim_time': True}]),
 
+        # motor_gui in the other modes (mimic/sequential, or independent
+        # without the coupling node): sliders for the actuated joints, sent
+        # to the trajectory controller via the gui-to-trajectory bridge,
+        # which learns the controller's joint set from controller_state.
+        Node(package='joint_state_publisher_gui', executable='joint_state_publisher_gui',
+             remappings=[('joint_states', 'gui_joint_states')],
+             condition=IfCondition(PythonExpression(
+                 ["('", coupling, "' != 'independent' or '",
+                  LaunchConfiguration('use_coupling'), "' != 'true') and '",
+                  LaunchConfiguration('motor_gui'), "' == 'true'"])),
+             parameters=[{'use_sim_time': True}]),
+        Node(package='rh8d_description', executable='joint_gui_to_trajectory.py',
+             condition=IfCondition(PythonExpression(
+                 ["('", coupling, "' != 'independent' or '",
+                  LaunchConfiguration('use_coupling'), "' != 'true') and '",
+                  LaunchConfiguration('motor_gui'), "' == 'true'"])),
+             parameters=[{'use_sim_time': True}]),
+
         Node(package='rviz2', executable='rviz2',
              arguments=['-d', PathJoinSubstitution([pkg, 'rviz', 'rh8d.rviz'])],
              parameters=[{'use_sim_time': True}],
