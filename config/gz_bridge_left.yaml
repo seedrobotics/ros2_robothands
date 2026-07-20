@@ -1,0 +1,33 @@
+# ros_gz_bridge configuration for the left RH8D:
+#   ros2 run ros_gz_bridge parameter_bridge --ros-args \
+#     -p config_file:=$(ros2 pkg prefix --share rh8d_description)/config/gz_bridge_left.yaml
+- gz_topic_name: rh8d/left/fingertip/thumb/wrench
+  ros_topic_name: /rh8d/left/fingertip/thumb/wrench
+  gz_type_name: gz.msgs.Wrench
+  ros_type_name: geometry_msgs/msg/WrenchStamped
+  direction: GZ_TO_ROS
+- gz_topic_name: rh8d/left/fingertip/index/wrench
+  ros_topic_name: /rh8d/left/fingertip/index/wrench
+  gz_type_name: gz.msgs.Wrench
+  ros_type_name: geometry_msgs/msg/WrenchStamped
+  direction: GZ_TO_ROS
+- gz_topic_name: rh8d/left/fingertip/middle/wrench
+  ros_topic_name: /rh8d/left/fingertip/middle/wrench
+  gz_type_name: gz.msgs.Wrench
+  ros_type_name: geometry_msgs/msg/WrenchStamped
+  direction: GZ_TO_ROS
+- gz_topic_name: rh8d/left/fingertip/ring/wrench
+  ros_topic_name: /rh8d/left/fingertip/ring/wrench
+  gz_type_name: gz.msgs.Wrench
+  ros_type_name: geometry_msgs/msg/WrenchStamped
+  direction: GZ_TO_ROS
+- gz_topic_name: rh8d/left/fingertip/little/wrench
+  ros_topic_name: /rh8d/left/fingertip/little/wrench
+  gz_type_name: gz.msgs.Wrench
+  ros_type_name: geometry_msgs/msg/WrenchStamped
+  direction: GZ_TO_ROS
+- gz_topic_name: rh8d/left/palm_ir/scan
+  ros_topic_name: /rh8d/left/palm_ir/scan
+  gz_type_name: gz.msgs.LaserScan
+  ros_type_name: sensor_msgs/msg/LaserScan
+  direction: GZ_TO_ROS

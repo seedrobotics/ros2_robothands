@@ -1,5 +1,5 @@
 {
     "urdf-visualizer.packages": {
-        "igus_rebel_description": "${workspaceFolder}"
+        "rh8d_description": "${workspaceFolder}"
     }
 }

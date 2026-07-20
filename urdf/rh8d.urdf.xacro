@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rh8d">
+
+  <!--
+    Standalone RH8D hand.
+
+      xacro rh8d.urdf.xacro side:=left finger_coupling:=mimic
+
+    To mount the hand on a robot, include rh8d_macro.xacro (and optionally
+    rh8d.gazebo.xacro / rh8d.ros2_control.xacro) and instantiate the macros
+    with your own parent link instead of using this file.
+  -->
+  <xacro:arg name="side" default="left"/>
+  <xacro:arg name="finger_coupling" default="mimic"/>
+  <xacro:arg name="couple_ring_little" default="true"/>
+  <xacro:arg name="use_gazebo" default="false"/>
+  <xacro:arg name="use_ros2_control" default="true"/>
+  <xacro:arg name="hardware_plugin" default="mock_components/GenericSystem"/>
+  <xacro:arg name="controllers_file"
+             default="$(find rh8d_description)/config/rh8d_controllers_$(arg side).yaml"/>
+
+  <xacro:include filename="$(find rh8d_description)/urdf/rh8d_macro.xacro"/>
+  <xacro:include filename="$(find rh8d_description)/urdf/rh8d.gazebo.xacro"/>
+  <xacro:include filename="$(find rh8d_description)/urdf/rh8d.ros2_control.xacro"/>
+
+  <xacro:property name="side"   value="$(arg side)"/>
+  <xacro:property name="prefix" value="${'l_' if side == 'left' else 'r_'}"/>
+
+  <link name="base_link"/>
+
+  <xacro:rh8d prefix="${prefix}" side="${side}" parent="base_link"
+              finger_coupling="$(arg finger_coupling)"
+              couple_ring_little="$(arg couple_ring_little)">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </xacro:rh8d>
+
+  <xacro:if value="$(arg use_ros2_control)">
+    <xacro:rh8d_ros2_control name="rh8d_${side}" prefix="${prefix}"
+                             finger_coupling="$(arg finger_coupling)"
+                             couple_ring_little="$(arg couple_ring_little)"
+                             use_gazebo="$(arg use_gazebo)"
+                             hardware_plugin="$(arg hardware_plugin)"/>
+  </xacro:if>
+
+  <xacro:if value="$(arg use_gazebo)">
+    <xacro:rh8d_gazebo prefix="${prefix}" side="${side}"/>
+    <xacro:if value="$(arg use_ros2_control)">
+      <gazebo>
+        <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+          <parameters>$(arg controllers_file)</parameters>
+        </plugin>
+      </gazebo>
+    </xacro:if>
+  </xacro:if>
+
+</robot>

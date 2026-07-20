@@ -1,0 +1,313 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Shared phalanx dimensions (identical for index/middle/ring/little). -->
+  <xacro:property name="phalanx_pitch"     value="0.0258749732"/>
+  <xacro:property name="finger_prox_upper" value="1.57"/>
+  <xacro:property name="finger_med_upper"  value="1.57"/>
+  <xacro:property name="finger_dist_upper" value="1.0"/>
+  <!-- Follower ratios in 'mimic' mode: scaled so every phalanx reaches its own
+       upper limit exactly when the leader reaches its upper limit. -->
+  <xacro:property name="finger_med_mult"   value="${finger_med_upper / finger_prox_upper}"/>
+  <xacro:property name="finger_dist_mult"  value="${finger_dist_upper / finger_prox_upper}"/>
+
+  <xacro:macro name="rh8d_phalanx_link" params="name mass com_y ixx iyy izz cyl_len cyl_rad cyl_y sph_y">
+    <link name="${name}">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 ${com_y} 0"/>
+        <mass value="${mass}"/>
+        <inertia ixx="${ixx}" ixy="0.0" ixz="0.0" iyy="${iyy}" iyz="0.0" izz="${izz}"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="rh8d_black"/>
+      </visual>
+      <collision>
+        <origin rpy="${pi/2} 0 0" xyz="0 ${cyl_y} 0"/>
+        <geometry>
+          <cylinder length="${cyl_len}" radius="${cyl_rad}"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 ${sph_y} 0"/>
+        <geometry>
+          <sphere radius="${cyl_rad}"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="rh8d_tip_link" params="name">
+    <link name="${name}">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 -0.010 0"/>
+        <mass value="0.01349695"/>
+        <inertia ixx="6.4e-07" ixy="0.0" ixz="0.0" iyy="3.8e-07" iyz="0.0" izz="6.4e-07"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/high_res/tip_refac.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="rh8d_black"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/tip_refac.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <!-- Fingertip 3D force sensor pad, mounted on a fixed joint so a Gazebo
+       force_torque sensor can be attached to it (the joint is preserved from
+       lumping in rh8d.gazebo.xacro). -->
+  <xacro:macro name="rh8d_fingertip_sensor" params="prefix finger tip_link">
+    <joint name="${prefix}${finger}_fingertip_joint" type="fixed">
+      <origin rpy="0 0 -0.35" xyz="0.00674 -0.01638 0"/>
+      <parent link="${tip_link}"/>
+      <child link="${prefix}${finger}_fingertip"/>
+    </joint>
+    <link name="${prefix}${finger}_fingertip">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.0005 0 0"/>
+        <mass value="0.0015"/>
+        <inertia ixx="2.0e-08" ixy="0.0" ixz="0.0" iyy="1.0e-08" iyz="0.0" izz="1.0e-08"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/high_res/sensor_refac.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="rh8d_sensor_green"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/sensor_refac.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <!-- Virtual motor joint used in 'sequential' coupling mode. Represents the
+       actuator position of one flexion tendon; the phalanx joints mimic it
+       with staggered offsets so they engage one after another. -->
+  <xacro:macro name="rh8d_drive_joint" params="prefix name parent upper">
+    <link name="${prefix}${name}_motor">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="1.0e-05"/>
+        <inertia ixx="1.0e-09" ixy="0.0" ixz="0.0" iyy="1.0e-09" iyz="0.0" izz="1.0e-09"/>
+      </inertial>
+    </link>
+    <joint name="${prefix}${name}_joint" type="revolute">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <parent link="${parent}"/>
+      <child link="${prefix}${name}_motor"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="20" lower="0.0" upper="${upper}" velocity="2"/>
+      <dynamics damping="0.1" friction="0.0"/>
+    </joint>
+  </xacro:macro>
+
+  <!--
+    One finger (index/middle/ring/little): proximal, medial, distal phalanges
+    plus the fingertip sensor pad.
+
+    coupling: 'mimic' | 'sequential' | 'independent'
+    leader:   name of the joint the finger follows.
+              mimic:      ''            -> proximal is the leader (own motor);
+                          '<joint>'     -> whole finger follows that joint
+                                           (little finger following the ring
+                                           proximal joint on the real hand)
+              sequential: '<drive joint>' (required)
+    mount_*:  palm mount origin, already side-mirrored by the caller.
+  -->
+  <xacro:macro name="rh8d_finger" params="prefix finger mount_xyz mount_rpy coupling leader:=''">
+    <xacro:property name="prox_joint" value="${prefix}${finger}_proximal_joint"/>
+    <xacro:property name="mimic_base" value="${leader if leader != '' else prox_joint}"/>
+
+    <joint name="${prox_joint}" type="revolute">
+      <origin rpy="${mount_rpy}" xyz="${mount_xyz}"/>
+      <parent link="${prefix}palm"/>
+      <child link="${prefix}${finger}_proximal"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="20" lower="0.0" upper="${finger_prox_upper}" velocity="2"/>
+      <dynamics damping="0.02" friction="0.0"/>
+      <xacro:if value="${coupling == 'sequential'}">
+        <mimic joint="${leader}" multiplier="1.0" offset="0.0"/>
+      </xacro:if>
+      <xacro:if value="${coupling == 'mimic' and leader != ''}">
+        <mimic joint="${leader}" multiplier="1.0" offset="0.0"/>
+      </xacro:if>
+    </joint>
+    <xacro:rh8d_phalanx_link name="${prefix}${finger}_proximal" mass="0.04596550" com_y="-0.0125"
+                             ixx="3.03e-06" iyy="1.27e-06" izz="3.03e-06"
+                             cyl_len="0.0162" cyl_rad="0.008" cyl_y="-0.0115" sph_y="-0.0036"/>
+
+    <joint name="${prefix}${finger}_medial_joint" type="revolute">
+      <origin rpy="0 0 -0.015" xyz="0 -${phalanx_pitch} 0"/>
+      <parent link="${prefix}${finger}_proximal"/>
+      <child link="${prefix}${finger}_medial"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="20" lower="0.0" upper="${finger_med_upper}" velocity="2"/>
+      <dynamics damping="0.01" friction="0.0"/>
+      <xacro:if value="${coupling == 'sequential'}">
+        <mimic joint="${leader}" multiplier="1.0" offset="${-finger_prox_upper}"/>
+      </xacro:if>
+      <xacro:if value="${coupling == 'mimic'}">
+        <mimic joint="${mimic_base}" multiplier="${finger_med_mult}" offset="0.0"/>
+      </xacro:if>
+    </joint>
+    <xacro:rh8d_phalanx_link name="${prefix}${finger}_medial" mass="0.02596550" com_y="-0.0125"
+                             ixx="1.71e-06" iyy="7.1e-07" izz="1.71e-06"
+                             cyl_len="0.0162" cyl_rad="0.008" cyl_y="-0.0115" sph_y="-0.0036"/>
+
+    <joint name="${prefix}${finger}_distal_joint" type="revolute">
+      <origin rpy="0 0 0" xyz="0 -${phalanx_pitch} 0"/>
+      <parent link="${prefix}${finger}_medial"/>
+      <child link="${prefix}${finger}_distal"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="20" lower="0.0" upper="${finger_dist_upper}" velocity="2"/>
+      <dynamics damping="0.001" friction="0.0"/>
+      <xacro:if value="${coupling == 'sequential'}">
+        <mimic joint="${leader}" multiplier="1.0" offset="${-(finger_prox_upper + finger_med_upper)}"/>
+      </xacro:if>
+      <xacro:if value="${coupling == 'mimic'}">
+        <mimic joint="${mimic_base}" multiplier="${finger_dist_mult}" offset="0.0"/>
+      </xacro:if>
+    </joint>
+    <xacro:rh8d_tip_link name="${prefix}${finger}_distal"/>
+
+    <xacro:rh8d_fingertip_sensor prefix="${prefix}" finger="${finger}" tip_link="${prefix}${finger}_distal"/>
+  </xacro:macro>
+
+  <!--
+    Thumb: abduction (own actuator) + three flexion phalanges driven by one
+    tendon. Abduction mount is calibrated per side and passed in by the caller.
+  -->
+  <xacro:property name="thumb_prox_upper" value="0.8"/>
+  <xacro:property name="thumb_med_upper"  value="1.57"/>
+  <xacro:property name="thumb_dist_upper" value="0.4"/>
+  <xacro:property name="thumb_med_mult"   value="${thumb_med_upper / thumb_prox_upper}"/>
+  <xacro:property name="thumb_dist_mult"  value="${thumb_dist_upper / thumb_prox_upper}"/>
+
+  <xacro:macro name="rh8d_thumb" params="prefix mount_xyz mount_rpy mount_axis coupling leader:=''">
+    <xacro:property name="prox_joint" value="${prefix}thumb_proximal_joint"/>
+    <xacro:property name="mimic_base" value="${leader if leader != '' else prox_joint}"/>
+
+    <joint name="${prefix}thumb_abduction_joint" type="revolute">
+      <origin rpy="${mount_rpy}" xyz="${mount_xyz}"/>
+      <parent link="${prefix}palm"/>
+      <child link="${prefix}thumb_base"/>
+      <axis xyz="${mount_axis}"/>
+      <limit effort="20" lower="-0.6" upper="${pi/4}" velocity="2"/>
+      <dynamics damping="0.3" friction="0.0"/>
+    </joint>
+    <link name="${prefix}thumb_base">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0.01537512"/>
+        <mass value="0.020"/>
+        <inertia ixx="2.06e-06" ixy="0.0" ixz="0.0" iyy="2.06e-06" iyz="0.0" izz="9.6e-07"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/thumb_base_refac.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="rh8d_black"/>
+      </visual>
+    </link>
+
+    <joint name="${prox_joint}" type="revolute">
+      <origin rpy="${pi/2} -1.01753528 ${-pi/2}" xyz="0 -0.0111644427 0.005490292"/>
+      <parent link="${prefix}thumb_base"/>
+      <child link="${prefix}thumb_proximal"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="20" lower="0.0" upper="${thumb_prox_upper}" velocity="2"/>
+      <dynamics damping="0.01" friction="0.0"/>
+      <xacro:if value="${coupling == 'sequential'}">
+        <mimic joint="${leader}" multiplier="1.0" offset="0.0"/>
+      </xacro:if>
+    </joint>
+    <link name="${prefix}thumb_proximal">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 -0.011 0"/>
+        <mass value="0.03767300"/>
+        <inertia ixx="2.03e-06" ixy="0.0" ixz="0.0" iyy="1.03e-06" iyz="0.0" izz="2.03e-06"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/thumb_phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="rh8d_black"/>
+      </visual>
+    </link>
+
+    <joint name="${prefix}thumb_medial_joint" type="revolute">
+      <origin rpy="0 0 0" xyz="0 -0.0215859928 0"/>
+      <parent link="${prefix}thumb_proximal"/>
+      <child link="${prefix}thumb_medial"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="20" lower="0.0" upper="${thumb_med_upper}" velocity="2"/>
+      <dynamics damping="0.01" friction="0.0"/>
+      <xacro:if value="${coupling == 'sequential'}">
+        <mimic joint="${leader}" multiplier="1.0" offset="${-thumb_prox_upper}"/>
+      </xacro:if>
+      <xacro:if value="${coupling == 'mimic'}">
+        <mimic joint="${mimic_base}" multiplier="${thumb_med_mult}" offset="0.0"/>
+      </xacro:if>
+    </joint>
+    <link name="${prefix}thumb_medial">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 -0.011 0"/>
+        <mass value="0.03767300"/>
+        <inertia ixx="2.03e-06" ixy="0.0" ixz="0.0" iyy="1.03e-06" iyz="0.0" izz="2.03e-06"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/thumb_phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="rh8d_black"/>
+      </visual>
+      <collision>
+        <origin rpy="${pi/2} 0 0" xyz="0 -0.009 0"/>
+        <geometry>
+          <cylinder length="0.011" radius="0.0074"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 -0.004 0"/>
+        <geometry>
+          <sphere radius="0.0074"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}thumb_distal_joint" type="revolute">
+      <origin rpy="0 0 0.078" xyz="0 -0.0215859928 0"/>
+      <parent link="${prefix}thumb_medial"/>
+      <child link="${prefix}thumb_distal"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="20" lower="0.0" upper="${thumb_dist_upper}" velocity="2"/>
+      <dynamics damping="0.001" friction="0.0"/>
+      <xacro:if value="${coupling == 'sequential'}">
+        <mimic joint="${leader}" multiplier="1.0" offset="${-(thumb_prox_upper + thumb_med_upper)}"/>
+      </xacro:if>
+      <xacro:if value="${coupling == 'mimic'}">
+        <mimic joint="${mimic_base}" multiplier="${thumb_dist_mult}" offset="0.0"/>
+      </xacro:if>
+    </joint>
+    <xacro:rh8d_tip_link name="${prefix}thumb_distal"/>
+
+    <xacro:rh8d_fingertip_sensor prefix="${prefix}" finger="thumb" tip_link="${prefix}thumb_distal"/>
+  </xacro:macro>
+
+</robot>

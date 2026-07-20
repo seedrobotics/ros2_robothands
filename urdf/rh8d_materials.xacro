@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <material name="rh8d_black">
+    <color rgba="0.1 0.1 0.1 1.0"/>
+  </material>
+  <material name="rh8d_sensor_green">
+    <color rgba="0.1 0.3215686274509804 0.2215686274509803 1.0"/>
+  </material>
+
+</robot>

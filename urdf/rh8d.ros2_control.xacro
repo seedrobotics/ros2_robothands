@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    ros2_control description for the RH8D.
+
+    Only the joints that correspond to real actuators get command interfaces;
+    mimic followers are resolved by the simulator (or by the hand firmware on
+    real hardware) and are intentionally NOT listed here, so gz_ros2_control
+    never touches them.
+
+    hardware_plugin: plugin for real hardware; defaults to mock components so
+                     the description works out of the box. Replace with the
+                     Seed Robotics driver's system interface when available.
+  -->
+  <xacro:macro name="rh8d_joint_iface" params="joint">
+    <joint name="${joint}">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="rh8d_ros2_control"
+               params="name prefix finger_coupling:=mimic couple_ring_little:=true
+                       use_gazebo:=false hardware_plugin:='mock_components/GenericSystem'">
+
+    <xacro:property name="gz"     value="${use_gazebo in [True, 'true', 'True', '1', 1]}"/>
+    <xacro:property name="couple" value="${couple_ring_little in [True, 'true', 'True', '1', 1]}"/>
+
+    <ros2_control name="${name}" type="system">
+      <hardware>
+        <xacro:if value="${gz}">
+          <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        </xacro:if>
+        <xacro:unless value="${gz}">
+          <plugin>${hardware_plugin}</plugin>
+        </xacro:unless>
+      </hardware>
+
+      <xacro:rh8d_joint_iface joint="${prefix}wrist_rotation_joint"/>
+      <xacro:rh8d_joint_iface joint="${prefix}wrist_adduction_joint"/>
+      <xacro:rh8d_joint_iface joint="${prefix}wrist_flexion_joint"/>
+      <xacro:rh8d_joint_iface joint="${prefix}thumb_abduction_joint"/>
+
+      <xacro:if value="${finger_coupling == 'mimic'}">
+        <xacro:rh8d_joint_iface joint="${prefix}thumb_proximal_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}index_proximal_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}middle_proximal_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}ring_proximal_joint"/>
+        <xacro:unless value="${couple}">
+          <xacro:rh8d_joint_iface joint="${prefix}little_proximal_joint"/>
+        </xacro:unless>
+      </xacro:if>
+
+      <xacro:if value="${finger_coupling == 'sequential'}">
+        <xacro:rh8d_joint_iface joint="${prefix}thumb_flexion_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}index_flexion_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}middle_flexion_joint"/>
+        <xacro:if value="${couple}">
+          <xacro:rh8d_joint_iface joint="${prefix}ring_little_flexion_joint"/>
+        </xacro:if>
+        <xacro:unless value="${couple}">
+          <xacro:rh8d_joint_iface joint="${prefix}ring_flexion_joint"/>
+          <xacro:rh8d_joint_iface joint="${prefix}little_flexion_joint"/>
+        </xacro:unless>
+      </xacro:if>
+
+      <xacro:if value="${finger_coupling == 'independent'}">
+        <xacro:rh8d_joint_iface joint="${prefix}thumb_proximal_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}thumb_medial_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}thumb_distal_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}index_proximal_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}index_medial_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}index_distal_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}middle_proximal_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}middle_medial_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}middle_distal_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}ring_proximal_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}ring_medial_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}ring_distal_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}little_proximal_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}little_medial_joint"/>
+        <xacro:rh8d_joint_iface joint="${prefix}little_distal_joint"/>
+      </xacro:if>
+    </ros2_control>
+
+  </xacro:macro>
+
+</robot>
