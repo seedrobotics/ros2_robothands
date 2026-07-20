@@ -51,6 +51,11 @@ def generate_launch_description():
         DeclareLaunchArgument('adaptive', default_value='true',
                               description='Contact-adaptive finger wrap in the '
                                           'coupling controller'),
+        DeclareLaunchArgument('motor_gui', default_value='false',
+                              description='Slider panel (one per real motor) '
+                                          'commanding the sim via the coupling '
+                                          'controller (independent mode)'),
+        DeclareLaunchArgument('rviz', default_value='false'),
 
         # Lets gz resolve the model://rh8d_description/... mesh URIs that
         # sdformat generates from the package:// paths.
@@ -89,6 +94,8 @@ def generate_launch_description():
         # Tendon coupling controller: maps the 8 motor axes onto the 19
         # independent joints with sequential engagement (and optional
         # contact-adaptive wrap). Only meaningful in independent mode.
+        # It also latches the sequential variant's description on
+        # motor_description for the motor slider GUI.
         Node(package='rh8d_description', executable='rh8d_coupling_node.py',
              condition=IfCondition(PythonExpression(
                  ["'", coupling, "' == 'independent' and '",
@@ -97,5 +104,28 @@ def generate_launch_description():
                           'couple_ring_little': LaunchConfiguration('couple_ring_little'),
                           'adaptive': LaunchConfiguration('adaptive'),
                           'output': 'trajectory',
+                          'motor_description': ParameterValue(Command([
+                              FindExecutable(name='xacro'), ' ',
+                              PathJoinSubstitution([pkg, 'urdf', 'rh8d.urdf.xacro']),
+                              ' side:=', side,
+                              ' finger_coupling:=sequential',
+                              ' couple_ring_little:=', LaunchConfiguration('couple_ring_little'),
+                          ]), value_type=str),
                           'use_sim_time': True}]),
+
+        # motor_gui:=true - one slider per real motor, driving the physics
+        # sim through the coupling controller.
+        Node(package='joint_state_publisher_gui', executable='joint_state_publisher_gui',
+             remappings=[('robot_description', 'motor_description'),
+                         ('joint_states', 'motor_commands')],
+             condition=IfCondition(PythonExpression(
+                 ["'", coupling, "' == 'independent' and '",
+                  LaunchConfiguration('use_coupling'), "' == 'true' and '",
+                  LaunchConfiguration('motor_gui'), "' == 'true'"])),
+             parameters=[{'use_sim_time': True}]),
+
+        Node(package='rviz2', executable='rviz2',
+             arguments=['-d', PathJoinSubstitution([pkg, 'rviz', 'rh8d.rviz'])],
+             parameters=[{'use_sim_time': True}],
+             condition=IfCondition(LaunchConfiguration('rviz'))),
     ])
