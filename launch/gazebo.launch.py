@@ -1,6 +1,7 @@
 from launch import LaunchDescription
 from launch.actions import (AppendEnvironmentVariable, DeclareLaunchArgument,
                             IncludeLaunchDescription)
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (Command, FindExecutable, LaunchConfiguration,
                                   PathJoinSubstitution, PythonExpression)
@@ -14,11 +15,12 @@ def generate_launch_description():
     coupling = LaunchConfiguration('finger_coupling')
     pkg = FindPackageShare('rh8d_description')
 
-    # rh8d_controllers_<side>.yaml, or rh8d_controllers_<side>_sequential.yaml
-    # in sequential mode (different actuated joint names).
+    # rh8d_controllers_<side>[_sequential|_independent].yaml - the actuated
+    # joint set differs per coupling mode.
     controllers_file = PathJoinSubstitution([pkg, 'config', PythonExpression([
         "'rh8d_controllers_' + '", side, "'",
-        " + ('_sequential' if '", coupling, "' == 'sequential' else '')",
+        " + {'mimic': '', 'sequential': '_sequential',",
+        "    'independent': '_independent'}['", coupling, "']",
         " + '.yaml'"])])
 
     robot_description = ParameterValue(
@@ -43,6 +45,12 @@ def generate_launch_description():
                               choices=['mimic', 'sequential', 'independent']),
         DeclareLaunchArgument('couple_ring_little', default_value='true'),
         DeclareLaunchArgument('headless', default_value='false'),
+        DeclareLaunchArgument('use_coupling', default_value='true',
+                              description='Run the tendon coupling controller '
+                                          '(independent mode only)'),
+        DeclareLaunchArgument('adaptive', default_value='true',
+                              description='Contact-adaptive finger wrap in the '
+                                          'coupling controller'),
 
         # Lets gz resolve the model://rh8d_description/... mesh URIs that
         # sdformat generates from the package:// paths.
@@ -70,4 +78,24 @@ def generate_launch_description():
         Node(package='ros_gz_bridge', executable='parameter_bridge',
              parameters=[{'config_file': PathJoinSubstitution(
                  [pkg, 'config', PythonExpression(["'gz_bridge_' + '", side, "' + '.yaml'"])])}]),
+
+        # Real-sensor semantics for the palm IR: single Range value, 0.255 m
+        # when nothing is in range (the hardware reports 255, never inf).
+        Node(package='rh8d_description', executable='palm_ir_adapter.py',
+             remappings=[('scan', ['/rh8d/', side, '/palm_ir/scan']),
+                         ('range', ['/rh8d/', side, '/palm_ir/range'])],
+             parameters=[{'use_sim_time': True}]),
+
+        # Tendon coupling controller: maps the 8 motor axes onto the 19
+        # independent joints with sequential engagement (and optional
+        # contact-adaptive wrap). Only meaningful in independent mode.
+        Node(package='rh8d_description', executable='rh8d_coupling_node.py',
+             condition=IfCondition(PythonExpression(
+                 ["'", coupling, "' == 'independent' and '",
+                  LaunchConfiguration('use_coupling'), "' == 'true'"])),
+             parameters=[{'prefix': PythonExpression(["'l_' if '", side, "' == 'left' else 'r_'"]),
+                          'couple_ring_little': LaunchConfiguration('couple_ring_little'),
+                          'adaptive': LaunchConfiguration('adaptive'),
+                          'output': 'trajectory',
+                          'use_sim_time': True}]),
     ])

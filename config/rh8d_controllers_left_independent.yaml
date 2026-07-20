@@ -1,0 +1,40 @@
+# Controllers for the left RH8D with finger_coupling:=independent
+# (all 19 joints actuated; drive them via scripts/rh8d_coupling_node.py for
+# tendon-like sequential/adaptive behavior, or directly for research).
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    hand_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+hand_controller:
+  ros__parameters:
+    joints:
+      - l_wrist_rotation_joint
+      - l_wrist_adduction_joint
+      - l_wrist_flexion_joint
+      - l_thumb_abduction_joint
+      - l_thumb_proximal_joint
+      - l_thumb_medial_joint
+      - l_thumb_distal_joint
+      - l_index_proximal_joint
+      - l_index_medial_joint
+      - l_index_distal_joint
+      - l_middle_proximal_joint
+      - l_middle_medial_joint
+      - l_middle_distal_joint
+      - l_ring_proximal_joint
+      - l_ring_medial_joint
+      - l_ring_distal_joint
+      - l_little_proximal_joint
+      - l_little_medial_joint
+      - l_little_distal_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity

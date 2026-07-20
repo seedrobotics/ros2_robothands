@@ -95,13 +95,34 @@ to model this:
     `mimic` mode. In Isaac Sim, PhysX mimic constraints support offsets
     natively and are the intended path for this mode (verify against your
     Isaac version).
-- **`independent`**: all 21 hand joints actuated (plus wrist), no coupling.
-  For grasping research where contact should interrupt the tendon coupling,
-  or as a base for PhysX tendon setups in Isaac Sim.
+- **`independent`**: all hand joints actuated, no mimic tags. Combined with
+  the shipped **tendon coupling controller**
+  (`scripts/rh8d_coupling_node.py`) this is the most faithful mode: one
+  command per real motor, physically correct sequential closing (verified in
+  Gazebo: proximal → medial → distal, each engaging only after the previous
+  saturates), and with `adaptive:=true` a contact-aware wrap — when a phalanx
+  is blocked by an object (large tracking error at near-zero velocity), the
+  remaining motor travel flows to the more distal joints, like the real
+  tendon. This is the behavior the mimic-based modes structurally cannot
+  express.
 
-None of the mimic modes can represent the adaptive wrap of a real tendon
-(distal phalanges continuing to close when a proximal one is blocked); use
-`independent` plus your own coupling controller or PhysX tendons for that.
+### Tendon coupling controller (independent mode)
+
+`rh8d_coupling_node.py` listens on `motor_commands` (sensor_msgs/JointState,
+one entry per motor axis — same names as the `sequential` drive joints plus
+the wrist/abduction pass-throughs) and outputs either a `JointTrajectory` for
+the `hand_controller` (simulation / hardware) or `joint_states` directly
+(RViz demo). Parameters: `prefix`, `couple_ring_little`, `adaptive`,
+`blocked_tolerance` (rad), `blocked_velocity` (rad/s), `rate`, `output`.
+
+- Gazebo: started automatically by `gazebo.launch.py` when
+  `finger_coupling:=independent` (disable with `use_coupling:=false`;
+  adaptive wrap on by default, `adaptive:=false` for strict sequencing).
+  Command e.g. `ros2 topic pub /motor_commands sensor_msgs/msg/JointState
+  "{name: [l_index_flexion_joint], position: [2.0]}"`.
+- RViz: `display.launch.py finger_coupling:=independent` shows one slider
+  per motor (the GUI is fed the sequential variant's description) driving
+  the full 19-joint model through the coupling map.
 
 ## Gazebo simulation
 
@@ -128,7 +149,10 @@ shows full TF) to ROS. Command the hand via
   joint, publishing on gz topics `rh8d/<side>/fingertip/<finger>/wrench`
   (z = normal force, x/y = shear, in the pad frame).
 - **Palm IR distance sensor**: `gpu_lidar` (3–254 mm) on
-  `rh8d/<side>/palm_ir/scan`.
+  `rh8d/<side>/palm_ir/scan`; `palm_ir_adapter.py` (started by
+  `gazebo.launch.py`) converts it to a single `sensor_msgs/Range` on
+  `/rh8d/<side>/palm_ir/range` with the real sensor's semantics: **0.255 m
+  when nothing is in range** (the hardware reports 255, never infinity).
 
 Bridge them to ROS with the shipped configs:
 
