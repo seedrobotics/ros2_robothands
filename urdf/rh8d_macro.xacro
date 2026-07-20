@@ -31,7 +31,7 @@
       <parent link="${parent}"/>
       <child link="${prefix}forearm"/>
       <axis xyz="0 0 1"/>
-      <limit effort="0.5" lower="${-pi/2}" upper="${pi/2}" velocity="1.0"/>
+      <limit effort="10" lower="${-pi/2}" upper="${pi/2}" velocity="3"/>
     </joint>
     <link name="${prefix}forearm">
       <inertial>
@@ -65,8 +65,8 @@
       <parent link="${prefix}forearm"/>
       <child link="${prefix}palm_axis"/>
       <axis xyz="0 0 1"/>
-      <limit effort="20" lower="${-pi/4}" upper="${pi/4}" velocity="2"/>
-      <dynamics damping="5" friction="0.0"/>
+      <limit effort="30" lower="${-pi/4}" upper="${pi/4}" velocity="3"/>
+      <dynamics damping="1" friction="0.0"/>
     </joint>
     <link name="${prefix}palm_axis">
       <inertial>
@@ -88,8 +88,8 @@
       <parent link="${prefix}palm_axis"/>
       <child link="${prefix}palm"/>
       <axis xyz="0 0 1"/>
-      <limit effort="20" lower="${-pi/4}" upper="${pi/4}" velocity="2"/>
-      <dynamics damping="5" friction="0.0"/>
+      <limit effort="30" lower="${-pi/4}" upper="${pi/4}" velocity="3"/>
+      <dynamics damping="1" friction="0.0"/>
     </joint>
     <link name="${prefix}palm">
       <inertial>

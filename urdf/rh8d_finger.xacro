@@ -10,6 +10,16 @@
        upper limit exactly when the leader reaches its upper limit. -->
   <xacro:property name="finger_med_mult"   value="${finger_med_upper / finger_prox_upper}"/>
   <xacro:property name="finger_dist_mult"  value="${finger_dist_upper / finger_prox_upper}"/>
+  <!-- Actuator strength/speed (tuned up from the sluggish NICOL originals:
+       effort 20 / velocity 2 left the fingers slow and the thumb prone to
+       sticking against the palm until jostled). -->
+  <xacro:property name="phalanx_effort"    value="30"/>
+  <xacro:property name="phalanx_velocity"  value="4"/>
+  <!-- Slightly negative lower limit: joints parked exactly ON a limit get
+       pinned by dartsim's limit constraint and never move (frozen-thumb bug);
+       a few degrees of backward slack matches the real tendon fingers and
+       keeps the rest pose strictly inside the range. -->
+  <xacro:property name="phalanx_lower"     value="-0.05"/>
 
   <xacro:macro name="rh8d_phalanx_link" params="name mass com_y ixx iyy izz cyl_len cyl_rad cyl_y sph_y">
     <link name="${name}">
@@ -113,7 +123,7 @@
       <parent link="${prefix}palm"/>
       <child link="${prefix}${finger}_proximal"/>
       <axis xyz="0 0 1"/>
-      <limit effort="20" lower="0.0" upper="${finger_prox_upper}" velocity="2"/>
+      <limit effort="${phalanx_effort}" lower="${phalanx_lower}" upper="${finger_prox_upper}" velocity="${phalanx_velocity}"/>
       <dynamics damping="0.02" friction="0.0"/>
       <xacro:if value="${coupling == 'mimic' and leader != ''}">
         <mimic joint="${leader}" multiplier="1.0" offset="0.0"/>
@@ -128,7 +138,7 @@
       <parent link="${prefix}${finger}_proximal"/>
       <child link="${prefix}${finger}_medial"/>
       <axis xyz="0 0 1"/>
-      <limit effort="20" lower="0.0" upper="${finger_med_upper}" velocity="2"/>
+      <limit effort="${phalanx_effort}" lower="${phalanx_lower}" upper="${finger_med_upper}" velocity="${phalanx_velocity}"/>
       <dynamics damping="0.01" friction="0.0"/>
       <xacro:if value="${coupling == 'mimic'}">
         <mimic joint="${mimic_base}" multiplier="${finger_med_mult}" offset="0.0"/>
@@ -143,7 +153,7 @@
       <parent link="${prefix}${finger}_medial"/>
       <child link="${prefix}${finger}_distal"/>
       <axis xyz="0 0 1"/>
-      <limit effort="20" lower="0.0" upper="${finger_dist_upper}" velocity="2"/>
+      <limit effort="${phalanx_effort}" lower="${phalanx_lower}" upper="${finger_dist_upper}" velocity="${phalanx_velocity}"/>
       <dynamics damping="0.001" friction="0.0"/>
       <xacro:if value="${coupling == 'mimic'}">
         <mimic joint="${mimic_base}" multiplier="${finger_dist_mult}" offset="0.0"/>
@@ -173,8 +183,8 @@
       <parent link="${prefix}palm"/>
       <child link="${prefix}thumb_base"/>
       <axis xyz="${mount_axis}"/>
-      <limit effort="20" lower="-0.6" upper="${pi/4}" velocity="2"/>
-      <dynamics damping="0.3" friction="0.0"/>
+      <limit effort="${phalanx_effort}" lower="-0.6" upper="${pi/4}" velocity="${phalanx_velocity}"/>
+      <dynamics damping="0.1" friction="0.0"/>
     </joint>
     <link name="${prefix}thumb_base">
       <inertial>
@@ -196,7 +206,7 @@
       <parent link="${prefix}thumb_base"/>
       <child link="${prefix}thumb_proximal"/>
       <axis xyz="0 0 1"/>
-      <limit effort="20" lower="0.0" upper="${thumb_prox_upper}" velocity="2"/>
+      <limit effort="${phalanx_effort}" lower="${phalanx_lower}" upper="${thumb_prox_upper}" velocity="${phalanx_velocity}"/>
       <dynamics damping="0.01" friction="0.0"/>
     </joint>
     <link name="${prefix}thumb_proximal">
@@ -219,7 +229,7 @@
       <parent link="${prefix}thumb_proximal"/>
       <child link="${prefix}thumb_medial"/>
       <axis xyz="0 0 1"/>
-      <limit effort="20" lower="0.0" upper="${thumb_med_upper}" velocity="2"/>
+      <limit effort="${phalanx_effort}" lower="${phalanx_lower}" upper="${thumb_med_upper}" velocity="${phalanx_velocity}"/>
       <dynamics damping="0.01" friction="0.0"/>
       <xacro:if value="${coupling == 'mimic'}">
         <mimic joint="${mimic_base}" multiplier="${thumb_med_mult}" offset="0.0"/>
@@ -257,7 +267,7 @@
       <parent link="${prefix}thumb_medial"/>
       <child link="${prefix}thumb_distal"/>
       <axis xyz="0 0 1"/>
-      <limit effort="20" lower="0.0" upper="${thumb_dist_upper}" velocity="2"/>
+      <limit effort="${phalanx_effort}" lower="${phalanx_lower}" upper="${thumb_dist_upper}" velocity="${phalanx_velocity}"/>
       <dynamics damping="0.001" friction="0.0"/>
       <xacro:if value="${coupling == 'mimic'}">
         <mimic joint="${mimic_base}" multiplier="${thumb_dist_mult}" offset="0.0"/>
