@@ -77,7 +77,12 @@ echo 1 | sudo tee /sys/bus/usb-serial/devices/ttyUSB0/latency_timer
 ros2 launch seed_hand_bringup hand.launch.py side:=right
 ros2 launch seed_hand_bringup hand.launch.py side:=right use_sensors:=true
 ros2 launch seed_hand_bringup hand.launch.py side:=both use_sensors:=true
+ros2 launch seed_hand_bringup hand.launch.py side:=right rviz:=true motor_gui:=true
 ```
+
+`rviz:=true` shows the measured hand pose live; `motor_gui:=true` adds the
+same motor slider panel as the sim's `gazebo.launch.py` (single sides only,
+not `both`).
 
 Two hands on *different* ports: run two launches with `side:=left` and
 `side:=right` (each hand needs its own config with its own port).
@@ -119,16 +124,12 @@ ros2 topic pub -1 /motor_commands sensor_msgs/msg/JointState \
   "{name: [r_index_flexion_joint], position: [0.7]}"
 ```
 
-Watch the real hand live in RViz (run next to `hand.launch.py`); `gui:=true`
-adds the motor slider panel — the same one as the sim's `motor_gui:=true` —
-which drives the real hand:
+Visualization and the motor slider panel are flags on `hand.launch.py`
+(`rviz:=true motor_gui:=true`, see above); `view.launch.py side:=right
+gui:=true` provides the same as a standalone launch for a second machine.
 
-```bash
-ros2 launch seed_hand_bringup view.launch.py side:=right gui:=true
-```
-
-Careful: the sliders start at 0 / centered and command that pose as soon as
-the panel opens.
+Careful with the slider panel on real hardware: the sliders start at 0 /
+centered and command that pose as soon as the panel opens.
 
 > **Calibration**: the tick ↔ unit mapping defaults to the full motor range
 > (0–4095) over the full joint range and is **not hardware-calibrated** yet.
