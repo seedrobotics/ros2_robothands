@@ -17,9 +17,4 @@ setup(
     maintainer_email='willson@robotis.com',
     description='ROBOTIS Dynamixel SDK Python wrapper for ROS 2 (bundled v3.7.51)',
     license='Apache 2.0',
-    entry_points={
-        'console_scripts': [
-            'hand_handle_node = seed_robotics.hand_handle_node:main',
-        ],
-    },
 )
