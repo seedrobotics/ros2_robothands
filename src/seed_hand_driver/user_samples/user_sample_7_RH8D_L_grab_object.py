@@ -47,24 +47,24 @@ class GrabObjectNode(Node):
         self.joint_list = [LoneJoint() for _ in range(5)]
 
         self.names_step_1 = [
-            'l_th_adduction',
-            'l_ix_flexion',
-            'l_middle_flexion',
-            'l_ring_ltl_flexion',
+            'l_thumb_abduction_joint',
+            'l_index_flexion_joint',
+            'l_middle_flexion_joint',
+            'l_ring_little_flexion_joint',
         ]
         self.target_positions_step_1 = [4095, 4095, 4095, 4095]
         self.target_speeds_step_1 = [0, 100, 100, 100]
 
-        self.names_step_2 = ['l_th_flexion']
+        self.names_step_2 = ['l_thumb_flexion_joint']
         self.target_positions_step_2 = [4095]
         self.target_speeds_step_2 = [50]
 
         self.names_step_3 = [
-            'l_th_adduction',
-            'l_th_flexion',
-            'l_ix_flexion',
-            'l_middle_flexion',
-            'l_ring_ltl_flexion',
+            'l_thumb_abduction_joint',
+            'l_thumb_flexion_joint',
+            'l_index_flexion_joint',
+            'l_middle_flexion_joint',
+            'l_ring_little_flexion_joint',
         ]
         self.target_positions_step_3 = [0, 0, 0, 0, 0]
         self.target_speeds_step_3 = [10, 10, 10, 10, 10]
@@ -91,15 +91,15 @@ class GrabObjectNode(Node):
 
     def joints_callback(self, joints_data):
         for joint in joints_data.joints:
-            if joint.name == 'l_th_adduction':
+            if joint.name == 'l_thumb_abduction_joint':
                 self.joint_list[0] = joint
-            if joint.name == 'l_th_flexion':
+            if joint.name == 'l_thumb_flexion_joint':
                 self.joint_list[1] = joint
-            if joint.name == 'l_ix_flexion':
+            if joint.name == 'l_index_flexion_joint':
                 self.joint_list[2] = joint
-            if joint.name == 'l_middle_flexion':
+            if joint.name == 'l_middle_flexion_joint':
                 self.joint_list[3] = joint
-            if joint.name == 'l_ring_ltl_flexion':
+            if joint.name == 'l_ring_little_flexion_joint':
                 self.joint_list[4] = joint
 
     def main_board_callback(self, main_board_data):

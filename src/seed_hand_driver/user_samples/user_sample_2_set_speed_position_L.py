@@ -6,9 +6,9 @@ from rclpy.node import Node
 from seed_hand_msgs.msg import JointListSetSpeedPos, JointSetSpeedPos
 
 
-joint_names        = ['l_w_rotation', 'l_w_flexion', 'l_w_adduction',
-                      'l_th_adduction', 'l_th_flexion',
-                      'l_ix_flexion', 'l_middle_flexion', 'l_ring_ltl_flexion']
+joint_names        = ['l_wrist_rotation_joint', 'l_wrist_flexion_joint', 'l_wrist_adduction_joint',
+                      'l_thumb_abduction_joint', 'l_thumb_flexion_joint',
+                      'l_index_flexion_joint', 'l_middle_flexion_joint', 'l_ring_little_flexion_joint']
 target_positions   = [1000, 2048, 2000, 0, 0, 0, 0, 0]
 target_speeds      = [0, 100, 200, 300, 400, 500, 0, 0]
 
