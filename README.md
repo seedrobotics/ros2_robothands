@@ -9,6 +9,10 @@ description by Nicolas Frick (MIT license, attribution preserved — see
 [LICENSE](LICENSE)); it has been refactored from two 1600-line generated ROS 1
 URDFs into parameterized xacro macros.
 
+**Integrating the hand into a full robot? Read [INTEGRATION.md](INTEGRATION.md)**
+— mounting macro, Gazebo checklist, the dartsim limit-pinning rule, tuning
+knobs.
+
 ## Quick start
 
 ```bash
