@@ -15,6 +15,10 @@
 
   <exec_depend>seed_hand_driver</exec_depend>
   <exec_depend>ros2_sensor_pkg</exec_depend>
+  <exec_depend>seed_rh8d_description</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>xacro</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
 

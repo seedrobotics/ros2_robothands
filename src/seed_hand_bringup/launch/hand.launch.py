@@ -18,6 +18,7 @@ HAND_CONFIG = {'left': 'RH8D_L.yaml', 'right': 'RH8D_R.yaml', 'both': 'RH8D_RL.y
 def setup(context, *args, **kwargs):
     side = context.launch_configurations['side']
     use_sensors = context.launch_configurations['use_sensors'].lower() == 'true'
+    aligned = context.launch_configurations['aligned_interface'].lower() == 'true'
 
     actions = [
         Node(
@@ -29,6 +30,20 @@ def setup(context, *args, **kwargs):
                 FindPackageShare('seed_hand_driver'), 'config', HAND_CONFIG[side]])],
         ),
     ]
+
+    if aligned:
+        # sim-compatible topics/units next to the native tick interface;
+        # side:=both shares the RL_ driver but needs one bridge per hand
+        topic_prefix = {'left': 'L_', 'right': 'R_', 'both': 'RL_'}[side]
+        for s in (['left', 'right'] if side == 'both' else [side]):
+            actions.append(Node(
+                package='seed_hand_driver',
+                executable='aligned_interface',
+                name=f'hand_aligned_interface_{s}',
+                output='screen',
+                parameters=[{'topic_prefix': topic_prefix,
+                             'joint_prefix': s[0] + '_'}],
+            ))
 
     if use_sensors:
         sensor_sides = ['left', 'right'] if side == 'both' else [side]
@@ -53,5 +68,9 @@ def generate_launch_description():
                               description='Which hand(s) to bring up'),
         DeclareLaunchArgument('use_sensors', default_value='false',
                               description='Also start the in-hand FTS sensor node(s)'),
+        DeclareLaunchArgument('aligned_interface', default_value='true',
+                              description='Start the sim-aligned interface '
+                                          '(motor_commands / motor_states / '
+                                          'hand_controller/joint_trajectory)'),
         OpaqueFunction(function=setup),
     ])

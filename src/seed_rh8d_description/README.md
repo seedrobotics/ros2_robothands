@@ -93,13 +93,20 @@ one entry per motor axis: `*_{thumb,index,middle}_flexion_joint`,
 `*_ring_little_flexion_joint`, plus the wrist/abduction pass-throughs) and outputs either a `JointTrajectory` for
 the `hand_controller` (simulation / hardware) or `joint_states` directly
 (RViz demo). Parameters: `prefix`, `couple_ring_little`, `adaptive`,
-`blocked_tolerance` (rad), `blocked_velocity` (rad/s), `rate`, `output`.
+`blocked_tolerance` (rad), `blocked_velocity` (rad/s), `rate`, `output`,
+`normalized_fingers`.
+
+**Units** (`normalized_fingers:=true`, the default): flexion axes take a
+closure fraction 0 (open) – 1 (closed); wrist and thumb-abduction axes take
+radians. This is the same convention the real hand's aligned interface in
+`seed_hand_driver` speaks, so commands are portable between sim and hardware.
+`normalized_fingers:=false` restores raw radians of summed tendon travel.
 
 - Gazebo: started automatically by `seed_rh8d_gazebo`'s `gazebo.launch.py` when
   `finger_coupling:=independent` (disable with `use_coupling:=false`;
   adaptive wrap on by default, `adaptive:=false` for strict sequencing).
   Command e.g. `ros2 topic pub /motor_commands sensor_msgs/msg/JointState
-  "{name: [l_index_flexion_joint], position: [2.0]}"`.
+  "{name: [l_index_flexion_joint], position: [0.5]}"` (half closed).
 - RViz: `display.launch.py finger_coupling:=independent` shows one slider
   per motor (the GUI is fed a generated motor-panel description) driving
   the full 19-joint model through the coupling map.

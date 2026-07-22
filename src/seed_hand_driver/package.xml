@@ -12,6 +12,8 @@
 
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>trajectory_msgs</depend>
   <depend>seed_hand_msgs</depend>
   <depend>dynamixel_sdk</depend>
 

@@ -10,6 +10,11 @@ install(PROGRAMS scripts/hand_handle_node.py
   RENAME hand_handle_node
 )
 
+install(PROGRAMS scripts/aligned_interface.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME aligned_interface
+)
+
 #install(PROGRAMS scripts/glove_ros2_node.py
 #  DESTINATION lib/${PROJECT_NAME}
 #  RENAME glove_ros2_node

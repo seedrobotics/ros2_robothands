@@ -19,6 +19,11 @@ Interface
        couple_ring_little:=false), plus the pass-through axes
        <prefix>wrist_{rotation,adduction,flexion}_joint and
        <prefix>thumb_abduction_joint.
+       Units (normalized_fingers:=true, the default): flexion axes take a
+       closure fraction 0 (open) .. 1 (closed); pass-through axes take
+       radians. This matches the real-hand aligned interface in
+       seed_hand_driver. normalized_fingers:=false restores raw radians of
+       summed tendon travel on the flexion axes.
   in:  joint_states (sensor_msgs/JointState) - feedback for adaptive mode.
   out: output:=trajectory   -> JointTrajectory on hand_controller/joint_trajectory
        output:=joint_states -> JointState on joint_states (RViz demo, no sim)
@@ -57,6 +62,7 @@ class CouplingNode(Node):
         # Commands stay this far inside the joint limits: dartsim pins joints
         # that park exactly ON a limit (they stay stuck until knocked free).
         self.margin = self.declare_parameter('limit_margin', 0.03).value
+        self.normalized = self.declare_parameter('normalized_fingers', True).value
 
         finger = lambda f: [(f'{p}{f}_proximal_joint', 1.57),
                             (f'{p}{f}_medial_joint', 1.57),
@@ -82,6 +88,10 @@ class CouplingNode(Node):
             f'{p}wrist_flexion_joint': (-0.7854, 0.7854),
             f'{p}thumb_abduction_joint': (-0.6, 0.7854),
         }
+        # full tendon travel of each flexion axis (limit margins excluded) -
+        # the scale of a normalized 0..1 command
+        self.travel = {motor: sum(u - self.margin for _, u in chains[0])
+                       for motor, chains in self.groups.items()}
         self.motors = {name: 0.0 for name in
                        list(self.passthrough) + list(self.groups)}
         self.out_joints = list(self.passthrough) + [
@@ -113,8 +123,8 @@ class CouplingNode(Node):
         """URDF with one revolute joint per motor axis - slider panel source."""
         m = self.margin
         joints = [(n, (lo + m, hi - m)) for n, (lo, hi) in self.passthrough.items()] + [
-            (motor, (0.0, sum(u - m for _, u in chains[0])))
-            for motor, chains in self.groups.items()]
+            (motor, (0.0, 1.0 if self.normalized else self.travel[motor]))
+            for motor in self.groups]
         parts = ['<robot name="rh8d_motors">', '<link name="motors"/>']
         for name, (lo, hi) in joints:
             parts += [f'<link name="{name}_pos"/>',
@@ -164,8 +174,11 @@ class CouplingNode(Node):
         for name, (lo, hi) in self.passthrough.items():
             cmds[name] = clamp(self.motors[name], lo + self.margin, hi - self.margin)
         for motor, chains in self.groups.items():
+            m = self.motors[motor]
+            if self.normalized:
+                m = clamp(m, 0.0, 1.0) * self.travel[motor]
             for chain in chains:
-                cmds.update(self.solve_chain(chain, self.motors[motor]))
+                cmds.update(self.solve_chain(chain, m))
 
         now = self.get_clock().now().to_msg()
         if self.traj_pub is not None:

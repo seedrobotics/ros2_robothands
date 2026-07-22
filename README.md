@@ -98,9 +98,41 @@ larger robot, and
 [src/seed_rh8d_description/INTEGRATION.md](src/seed_rh8d_description/INTEGRATION.md)
 for simulation gotchas.
 
-Note: the simulation currently uses ros2_control with different joint names
-and interfaces than the hardware driver below — code written against one does
-not yet run against the other.
+## Aligned interface (sim ↔ real)
+
+The real hand and the simulation speak a common interface, started by
+default from `hand.launch.py`:
+
+| Topic | Type | Direction |
+|---|---|---|
+| `motor_commands` | `sensor_msgs/JointState` | command, one entry per motor axis |
+| `hand_controller/joint_trajectory` | `trajectory_msgs/JointTrajectory` | command (the sim controller's topic; phalanx or motor-axis names) |
+| `motor_states` | `sensor_msgs/JointState` | measured motor positions (real hand) |
+
+Motor axes carry the model's joint names (`r_wrist_rotation_joint`,
+`r_index_flexion_joint`, …). **Units**: finger flexion axes take a closure
+fraction 0 (open) – 1 (closed); wrist and thumb-abduction axes take radians.
+The same command closes the finger in Gazebo and on the real hand:
+
+```bash
+ros2 topic pub -1 /motor_commands sensor_msgs/msg/JointState \
+  "{name: [r_index_flexion_joint], position: [0.7]}"
+```
+
+Watch the real hand live in RViz (run next to `hand.launch.py`):
+
+```bash
+ros2 launch seed_hand_bringup view.launch.py side:=right
+```
+
+> **Calibration**: the tick ↔ unit mapping defaults to the full motor range
+> (0–4095) over the full joint range and is **not hardware-calibrated** yet.
+> Override `calib.<axis>.tick_min` / `tick_max` parameters of the
+> `aligned_interface` node once measured (swap the two values to invert a
+> motor's direction).
+
+The legacy tick-based topics below remain unchanged and can be used in
+parallel.
 
 ## Driver topics
 
