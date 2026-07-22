@@ -20,14 +20,14 @@ def generate_launch_description():
     )
 
     hand_config = PathJoinSubstitution([
-        FindPackageShare('seed_robotics'),
+        FindPackageShare('seed_hand_driver'),
         'config',
         LaunchConfiguration('hand_config'),
     ])
 
     # Hand controller node
     hand_node = Node(
-        package='seed_robotics',
+        package='seed_hand_driver',
         executable='hand_handle_node',
         name='hand_handle_node',
         output='screen',

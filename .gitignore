@@ -70,6 +70,6 @@ Thumbs.db
 # !**/.keep
 
 
-src/seed_robotics/scripts/aruco_multicam_pose_ros2.py
-src/seed_robotics/scripts/aruco_wrist_pose.py
-src/seed_robotics/scripts/glove_ros2_node.py
+src/seed_hand_driver/scripts/aruco_multicam_pose_ros2.py
+src/seed_hand_driver/scripts/aruco_wrist_pose.py
+src/seed_hand_driver/scripts/glove_ros2_node.py

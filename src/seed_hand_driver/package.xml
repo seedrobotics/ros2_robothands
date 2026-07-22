@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>seed_robotics</name>
+  <name>seed_hand_driver</name>
   <version>0.2.0</version>
   <description>RH8D robotic hand controller for ROS 2 Jazzy</description>
   <maintainer email="lennart@seedrobotics.com">lucas</maintainer>

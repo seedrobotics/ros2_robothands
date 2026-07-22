@@ -6,13 +6,13 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     config = PathJoinSubstitution([
-        FindPackageShare('seed_robotics'),
+        FindPackageShare('seed_hand_driver'),
         'config',
         'RH8D_L.yaml',
     ])
 
     hand_node = Node(
-        package='seed_robotics',
+        package='seed_hand_driver',
         executable='hand_handle_node',
         name='hand_handle_node',
         output='screen',
