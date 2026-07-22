@@ -22,6 +22,124 @@ Visualization Manager:
       Enabled: false
       Marker Scale: 0.15
       Name: TF
+    - Class: rviz_common/Group
+      Enabled: true
+      Name: Fingertip forces right
+      Displays:
+        - Class: rviz_default_plugins/Wrench
+          Enabled: true
+          Name: thumb
+          Force Arrow Scale: 0.01
+          Force Color: 204; 51; 51
+          Torque Arrow Scale: 0
+          Width: 0.004
+          History Length: 1
+          Topic:
+            Value: /rh8d/right/fingertip/thumb/wrench
+          Value: true
+        - Class: rviz_default_plugins/Wrench
+          Enabled: true
+          Name: index
+          Force Arrow Scale: 0.01
+          Force Color: 51; 102; 204
+          Torque Arrow Scale: 0
+          Width: 0.004
+          History Length: 1
+          Topic:
+            Value: /rh8d/right/fingertip/index/wrench
+          Value: true
+        - Class: rviz_default_plugins/Wrench
+          Enabled: true
+          Name: middle
+          Force Arrow Scale: 0.01
+          Force Color: 51; 204; 102
+          Torque Arrow Scale: 0
+          Width: 0.004
+          History Length: 1
+          Topic:
+            Value: /rh8d/right/fingertip/middle/wrench
+          Value: true
+        - Class: rviz_default_plugins/Wrench
+          Enabled: true
+          Name: ring
+          Force Arrow Scale: 0.01
+          Force Color: 230; 153; 51
+          Torque Arrow Scale: 0
+          Width: 0.004
+          History Length: 1
+          Topic:
+            Value: /rh8d/right/fingertip/ring/wrench
+          Value: true
+        - Class: rviz_default_plugins/Wrench
+          Enabled: true
+          Name: little
+          Force Arrow Scale: 0.01
+          Force Color: 153; 102; 204
+          Torque Arrow Scale: 0
+          Width: 0.004
+          History Length: 1
+          Topic:
+            Value: /rh8d/right/fingertip/little/wrench
+          Value: true
+    - Class: rviz_common/Group
+      Enabled: true
+      Name: Fingertip forces left
+      Displays:
+        - Class: rviz_default_plugins/Wrench
+          Enabled: true
+          Name: thumb
+          Force Arrow Scale: 0.01
+          Force Color: 204; 51; 51
+          Torque Arrow Scale: 0
+          Width: 0.004
+          History Length: 1
+          Topic:
+            Value: /rh8d/left/fingertip/thumb/wrench
+          Value: true
+        - Class: rviz_default_plugins/Wrench
+          Enabled: true
+          Name: index
+          Force Arrow Scale: 0.01
+          Force Color: 51; 102; 204
+          Torque Arrow Scale: 0
+          Width: 0.004
+          History Length: 1
+          Topic:
+            Value: /rh8d/left/fingertip/index/wrench
+          Value: true
+        - Class: rviz_default_plugins/Wrench
+          Enabled: true
+          Name: middle
+          Force Arrow Scale: 0.01
+          Force Color: 51; 204; 102
+          Torque Arrow Scale: 0
+          Width: 0.004
+          History Length: 1
+          Topic:
+            Value: /rh8d/left/fingertip/middle/wrench
+          Value: true
+        - Class: rviz_default_plugins/Wrench
+          Enabled: true
+          Name: ring
+          Force Arrow Scale: 0.01
+          Force Color: 230; 153; 51
+          Torque Arrow Scale: 0
+          Width: 0.004
+          History Length: 1
+          Topic:
+            Value: /rh8d/left/fingertip/ring/wrench
+          Value: true
+        - Class: rviz_default_plugins/Wrench
+          Enabled: true
+          Name: little
+          Force Arrow Scale: 0.01
+          Force Color: 153; 102; 204
+          Torque Arrow Scale: 0
+          Width: 0.004
+          History Length: 1
+          Topic:
+            Value: /rh8d/left/fingertip/little/wrench
+          Value: true
   Global Options:
     Fixed Frame: base_link
     Frame Rate: 30
