@@ -36,6 +36,7 @@ import math
 
 import rclpy
 from rclpy.node import Node
+from rcl_interfaces.msg import SetParametersResult
 from geometry_msgs.msg import WrenchStamped
 from std_srvs.srv import Trigger
 
@@ -43,6 +44,17 @@ from ros2_sensor_pkg.msg import AllSensors
 
 FINGERS = ['thumb', 'index', 'middle', 'ring', 'little']
 AXES = {'x': 0, 'y': 1, 'z': 2}
+
+
+def parse_axis_map(axis_map):
+    """['y', '-x', 'z'] -> [(src_index, sign), ...] for output axes x,y,z."""
+    if len(axis_map) != 3:
+        raise ValueError('axis_map needs exactly 3 entries')
+    remap = []
+    for spec in axis_map:
+        sign = -1.0 if spec.startswith('-') else 1.0
+        remap.append((AXES[spec.lstrip('-')], sign))
+    return remap
 
 
 class SensorWrenchAdapter(Node):
@@ -58,11 +70,10 @@ class SensorWrenchAdapter(Node):
         topic_prefix = {'left': 'L_', 'right': 'R_'}[side]
         jp = side[0] + '_'
 
-        # output axis i takes sign*input_axis[src]
-        self.remap = []
-        for spec in axis_map:
-            sign = -1.0 if spec.startswith('-') else 1.0
-            self.remap.append((AXES[spec.lstrip('-')], sign))
+        self.remap = parse_axis_map(axis_map)
+        # force_scale, min_force and axis_map are live-tunable:
+        #   ros2 param set /sensor_wrench_adapter_right axis_map "['y','-x','z']"
+        self.add_on_set_parameters_callback(self.on_set_params)
 
         self.frame_by_id = {i: f'{jp}{f}_fingertip' for i, f in enumerate(order)}
         self.pub_by_id = {
@@ -83,6 +94,22 @@ class SensorWrenchAdapter(Node):
             f'min_force={self.min_force}, axis_map={axis_map}, '
             f'auto-taring over first {self.tare_samples} samples - keep '
             'fingertips unloaded)')
+
+    def on_set_params(self, params):
+        for p in params:
+            if p.name == 'force_scale':
+                self.scale = float(p.value)
+            elif p.name == 'min_force':
+                self.min_force = float(p.value)
+            elif p.name == 'axis_map':
+                try:
+                    self.remap = parse_axis_map(p.value)
+                except (ValueError, KeyError) as e:
+                    return SetParametersResult(
+                        successful=False,
+                        reason=f'bad axis_map (want e.g. ["y","-x","z"]): {e}')
+            self.get_logger().info(f'{p.name} -> {p.value}')
+        return SetParametersResult(successful=True)
 
     def on_tare(self, request, response):
         self._tare_acc.clear()
