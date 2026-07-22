@@ -47,10 +47,12 @@ joint, and sensor names are fully prefixed and won't collide.
   corrupts existing articulations whenever a model is inserted at runtime
   (verified: 100 rad/s thrashing from a sphere spawned 0.5 m away) and does
   not enforce joint velocity limits. Your world also needs the `Sensors`
-  (with ogre2) and `ForceTorque` systems — see `worlds/rh8d_world.sdf`.
+  (with ogre2) and `ForceTorque` systems — see `seed_rh8d_gazebo`'s
+  `worlds/rh8d_world.sdf`.
 - **One gz_ros2_control plugin per model.** The parent robot's plugin block
   serves the hand too; merge the hand's controller parameters (see
-  `config/rh8d_controllers_*.yaml` for the per-mode joint sets) into your
+  `seed_rh8d_gazebo`'s `config/rh8d_controllers_*.yaml` for the per-mode
+  joint sets) into your
   robot's controllers YAML. Keep `position_proportional_gain` ≥ 0.3 or the
   hand will feel sluggish regardless of joint velocity limits (velocity
   command = gain × error × update_rate).
@@ -59,13 +61,15 @@ joint, and sensor names are fully prefixed and won't collide.
   a proper base already.
 - **Mesh resolution**: append the package share's *parent* directory to
   `GZ_SIM_RESOURCE_PATH` (sdformat rewrites `package://` to `model://`).
-- **Bridge config**: `config/gz_bridge_*.yaml` hardcodes the world name
+- **Bridge config**: `seed_rh8d_gazebo`'s `config/gz_bridge_*.yaml` hardcodes
+  the world name
   (`rh8d_world`) and model name (`rh8d_left`/`rh8d_right`) in the
   joint-state bridge entry — adapt both to your world/model names. The
   /clock bridge must stay in the YAML: parameter_bridge ignores
   `config_file` when any positional topic argument is given.
-- Reuse `palm_ir_adapter.py` (LaserScan → Range, 0.255 m no-echo sentinel)
-  and, for independent mode, `rh8d_coupling_node.py` (set `prefix`).
+- Reuse `palm_ir_adapter.py` from `seed_rh8d_gazebo` (LaserScan → Range,
+  0.255 m no-echo sentinel) and, for independent mode, this package's
+  `rh8d_coupling_node.py` (set `prefix`).
 
 ## The dartsim limit-pinning rule (IMPORTANT)
 

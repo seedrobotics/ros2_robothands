@@ -41,7 +41,7 @@ xacro urdf/rh8d.urdf.xacro side:=right use_ros2_control:=false > urdf/rh8d_right
 | `use_gazebo` | `false` | emit gz-sim sensors, contact params and the gz_ros2_control plugin |
 | `use_ros2_control` | `true` | emit the `<ros2_control>` system block |
 | `hardware_plugin` | `mock_components/GenericSystem` | hardware interface for real hardware |
-| `controllers_file` | `config/rh8d_controllers_<side>.yaml` | parameters for gz_ros2_control |
+| `controllers_file` | *(no usable default)* | parameters for gz_ros2_control; must be passed with `use_gazebo:=true` — the sim configs live in `seed_rh8d_gazebo`, whose launch passes this automatically |
 
 To mount the hand on a robot, include `urdf/rh8d_macro.xacro` and instantiate
 the `rh8d` macro with your own `parent` link and origin instead of using the
@@ -95,7 +95,7 @@ the `hand_controller` (simulation / hardware) or `joint_states` directly
 (RViz demo). Parameters: `prefix`, `couple_ring_little`, `adaptive`,
 `blocked_tolerance` (rad), `blocked_velocity` (rad/s), `rate`, `output`.
 
-- Gazebo: started automatically by `gazebo.launch.py` when
+- Gazebo: started automatically by `seed_rh8d_gazebo`'s `gazebo.launch.py` when
   `finger_coupling:=independent` (disable with `use_coupling:=false`;
   adaptive wrap on by default, `adaptive:=false` for strict sequencing).
   Command e.g. `ros2 topic pub /motor_commands sensor_msgs/msg/JointState
@@ -106,53 +106,15 @@ the `hand_controller` (simulation / hardware) or `joint_states` directly
 
 ## Gazebo simulation
 
-Requires `ros-jazzy-ros-gz` and `ros-jazzy-gz-ros2-control` (intentionally not
-hard dependencies of this package):
+Lives in the separate [seed_rh8d_gazebo](../seed_rh8d_gazebo/) package
+(world, controller and bridge configs, sim helper nodes):
 
 ```bash
-ros2 launch seed_rh8d_description gazebo.launch.py side:=left finger_coupling:=mimic
-# headless server only: headless:=true
+ros2 launch seed_rh8d_gazebo gazebo.launch.py side:=left finger_coupling:=mimic
 ```
 
-This starts gz-sim Harmonic with `worlds/rh8d_world.sdf` (dartsim, the
-default engine — mimic-mode followers are enforced by gz_ros2_control, so
-no SDF mimic constraints are needed), spawns the hand anchored to the world,
-activates `joint_state_broadcaster` + `hand_controller` (a
-JointTrajectoryController over the actuated joints), and bridges clock,
-sensors and the complete gz joint state (including mimic followers, so RViz
-shows full TF) to ROS. Command the hand via
-`/hand_controller/joint_trajectory`.
-
-**Physics engine note:** the world runs dartsim (Gazebo's default engine).
-It does not support SDF mimic constraints, so mimic-mode follower joints are
-declared state-only in the ros2_control block and enforced by gz_ros2_control.
-
-`motor_gui:=true` works in both modes: in independent(+coupling) mode the
-sliders are the 8 motor axes feeding the coupling node; in mimic mode (and
-raw independent) the sliders are the controller's actuated joints, routed
-through `joint_gui_to_trajectory.py`, which learns the joint set from the
-controller automatically.
-
-## Sensors (Gazebo, `use_gazebo:=true`)
-
-- **Fingertip 3D force sensors**: one `force_torque` sensor per fingertip pad
-  joint, publishing on gz topics `rh8d/<side>/fingertip/<finger>/wrench`
-  (z = normal force, x/y = shear, in the pad frame).
-- **Palm IR distance sensor**: `gpu_lidar` (3–254 mm) on
-  `rh8d/<side>/palm_ir/scan`; `palm_ir_adapter.py` (started by
-  `gazebo.launch.py`) converts it to a single `sensor_msgs/Range` on
-  `/rh8d/<side>/palm_ir/range` with the real sensor's semantics: **0.255 m
-  when nothing is in range** (the hardware reports 255, never infinity).
-
-Bridge them to ROS with the shipped configs:
-
-```bash
-ros2 run ros_gz_bridge parameter_bridge --ros-args \
-  -p config_file:=$(ros2 pkg prefix --share seed_rh8d_description)/config/gz_bridge_left.yaml
-```
-
-Simulation requires `gz_ros2_control`, `ros_gz_sim` and `ros_gz_bridge`
-(intentionally not hard dependencies of this package).
+The model emits the sim-specific parts (gz sensors, contact params,
+gz_ros2_control plugin) only with `use_gazebo:=true`, which that launch sets.
 
 ## Tests
 
