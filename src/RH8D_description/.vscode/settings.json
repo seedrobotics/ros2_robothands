@@ -1,5 +1,0 @@
-{
-    "urdf-visualizer.packages": {
-        "rh8d_description": "${workspaceFolder}"
-    }
-}

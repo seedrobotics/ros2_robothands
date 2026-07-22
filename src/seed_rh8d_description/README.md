@@ -1,4 +1,4 @@
-# rh8d_description
+# seed_rh8d_description
 
 ROS 2 (Jazzy) description package for the [Seed Robotics RH8D](https://www.seedrobotics.com/rh8d-adult-robot-hand)
 dexterous robot hand — left and right, with ros2_control and Gazebo (gz-sim
@@ -16,9 +16,9 @@ knobs.
 ## Quick start
 
 ```bash
-colcon build --packages-select rh8d_description
+colcon build --packages-select seed_rh8d_description
 source install/setup.bash
-ros2 launch rh8d_description display.launch.py side:=left finger_coupling:=mimic
+ros2 launch seed_rh8d_description display.launch.py side:=left finger_coupling:=mimic
 ```
 
 `urdf/rh8d_left.urdf` and `urdf/rh8d_right.urdf` are pre-generated plain URDFs
@@ -110,7 +110,7 @@ Requires `ros-jazzy-ros-gz` and `ros-jazzy-gz-ros2-control` (intentionally not
 hard dependencies of this package):
 
 ```bash
-ros2 launch rh8d_description gazebo.launch.py side:=left finger_coupling:=mimic
+ros2 launch seed_rh8d_description gazebo.launch.py side:=left finger_coupling:=mimic
 # headless server only: headless:=true
 ```
 
@@ -148,7 +148,7 @@ Bridge them to ROS with the shipped configs:
 
 ```bash
 ros2 run ros_gz_bridge parameter_bridge --ros-args \
-  -p config_file:=$(ros2 pkg prefix --share rh8d_description)/config/gz_bridge_left.yaml
+  -p config_file:=$(ros2 pkg prefix --share seed_rh8d_description)/config/gz_bridge_left.yaml
 ```
 
 Simulation requires `gz_ros2_control`, `ros_gz_sim` and `ros_gz_bridge`
@@ -171,7 +171,7 @@ Deliberate fixes, in addition to the restructuring:
   revolute variant was a Gazebo Classic anti-lumping workaround; gz-sim uses
   `<preserveFixedJoint>`); all five pads share one uniform inertial
 - high-res meshes for palm/tips/pads visuals on both sides, low-res for
-  collisions; unified `package://rh8d_description` mesh paths
+  collisions; unified `package://seed_rh8d_description` mesh paths
 - ROS 1 remnants removed (`<transmission>`, `libgazebo_ros_control`,
   NICOL laser/F3D plugins → replaced by ros2_control + gz-sim sensors)
 - world link and fake `joint_base` removed; the hand mounts via the macro's

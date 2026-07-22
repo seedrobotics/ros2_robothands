@@ -16,7 +16,7 @@ def generate_launch_description():
     robot_description = ParameterValue(
         Command([
             FindExecutable(name='xacro'), ' ',
-            PathJoinSubstitution([FindPackageShare('rh8d_description'), 'urdf', 'rh8d.urdf.xacro']),
+            PathJoinSubstitution([FindPackageShare('seed_rh8d_description'), 'urdf', 'rh8d.urdf.xacro']),
             ' side:=', side,
             ' finger_coupling:=', coupling,
             ' couple_ring_little:=', LaunchConfiguration('couple_ring_little'),
@@ -53,13 +53,13 @@ def generate_launch_description():
              remappings=[('robot_description', 'motor_description'),
                          ('joint_states', 'motor_commands')],
              condition=IfCondition(coupling_demo)),
-        Node(package='rh8d_description', executable='rh8d_coupling_node.py',
+        Node(package='seed_rh8d_description', executable='rh8d_coupling_node.py',
              parameters=[{'prefix': PythonExpression(["'l_' if '", side, "' == 'left' else 'r_'"]),
                           'couple_ring_little': LaunchConfiguration('couple_ring_little'),
                           'output': 'joint_states'}],
              condition=IfCondition(coupling_demo)),
 
         Node(package='rviz2', executable='rviz2',
-             arguments=['-d', PathJoinSubstitution([FindPackageShare('rh8d_description'),
+             arguments=['-d', PathJoinSubstitution([FindPackageShare('seed_rh8d_description'),
                                                     'rviz', 'rh8d.rviz'])]),
     ])

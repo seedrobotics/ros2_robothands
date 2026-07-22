@@ -1,4 +1,4 @@
-# Integrating rh8d_description into a full robot
+# Integrating seed_rh8d_description into a full robot
 
 Checklist and gotchas for embedding the RH8D in a larger robot description /
 bringup. Everything here was learned the hard way during standalone
@@ -18,9 +18,9 @@ Do NOT use `urdf/rh8d.urdf.xacro` (that's the standalone file — it creates its
 own base/world links and the gz_ros2_control plugin). Instead:
 
 ```xml
-<xacro:include filename="$(find rh8d_description)/urdf/rh8d_macro.xacro"/>
-<xacro:include filename="$(find rh8d_description)/urdf/rh8d.gazebo.xacro"/>
-<xacro:include filename="$(find rh8d_description)/urdf/rh8d.ros2_control.xacro"/>
+<xacro:include filename="$(find seed_rh8d_description)/urdf/rh8d_macro.xacro"/>
+<xacro:include filename="$(find seed_rh8d_description)/urdf/rh8d.gazebo.xacro"/>
+<xacro:include filename="$(find seed_rh8d_description)/urdf/rh8d.ros2_control.xacro"/>
 
 <xacro:rh8d prefix="r_" side="right" parent="your_wrist_flange"
             finger_coupling="mimic" couple_ring_little="true">

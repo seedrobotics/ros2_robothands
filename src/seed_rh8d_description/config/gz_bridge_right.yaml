@@ -1,6 +1,6 @@
 # ros_gz_bridge configuration for the right RH8D:
 #   ros2 run ros_gz_bridge parameter_bridge --ros-args \
-#     -p config_file:=$(ros2 pkg prefix --share rh8d_description)/config/gz_bridge_right.yaml
+#     -p config_file:=$(ros2 pkg prefix --share seed_rh8d_description)/config/gz_bridge_right.yaml
 - gz_topic_name: /clock
   ros_topic_name: /clock
   gz_type_name: gz.msgs.Clock

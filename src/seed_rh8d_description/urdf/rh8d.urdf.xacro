@@ -17,11 +17,11 @@
   <xacro:arg name="use_ros2_control" default="true"/>
   <xacro:arg name="hardware_plugin" default="mock_components/GenericSystem"/>
   <xacro:arg name="controllers_file"
-             default="$(find rh8d_description)/config/rh8d_controllers_$(arg side).yaml"/>
+             default="$(find seed_rh8d_description)/config/rh8d_controllers_$(arg side).yaml"/>
 
-  <xacro:include filename="$(find rh8d_description)/urdf/rh8d_macro.xacro"/>
-  <xacro:include filename="$(find rh8d_description)/urdf/rh8d.gazebo.xacro"/>
-  <xacro:include filename="$(find rh8d_description)/urdf/rh8d.ros2_control.xacro"/>
+  <xacro:include filename="$(find seed_rh8d_description)/urdf/rh8d_macro.xacro"/>
+  <xacro:include filename="$(find seed_rh8d_description)/urdf/rh8d.gazebo.xacro"/>
+  <xacro:include filename="$(find seed_rh8d_description)/urdf/rh8d.ros2_control.xacro"/>
 
   <xacro:property name="side"   value="$(arg side)"/>
   <xacro:property name="prefix" value="${'l_' if side == 'left' else 'r_'}"/>

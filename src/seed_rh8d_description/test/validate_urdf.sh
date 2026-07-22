@@ -6,12 +6,12 @@
 set -e
 DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-if ! python3 -c "from ament_index_python.packages import get_package_share_directory as g; g('rh8d_description')" 2>/dev/null; then
+if ! python3 -c "from ament_index_python.packages import get_package_share_directory as g; g('seed_rh8d_description')" 2>/dev/null; then
   FAKE="$(mktemp -d)"
   trap 'rm -rf "$FAKE"' EXIT
   mkdir -p "$FAKE/share/ament_index/resource_index/packages"
-  touch "$FAKE/share/ament_index/resource_index/packages/rh8d_description"
-  ln -s "$DIR" "$FAKE/share/rh8d_description"
+  touch "$FAKE/share/ament_index/resource_index/packages/seed_rh8d_description"
+  ln -s "$DIR" "$FAKE/share/seed_rh8d_description"
   export AMENT_PREFIX_PATH="$FAKE${AMENT_PREFIX_PATH:+:$AMENT_PREFIX_PATH}"
 fi
 

@@ -13,7 +13,7 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
     side = LaunchConfiguration('side')
     coupling = LaunchConfiguration('finger_coupling')
-    pkg = FindPackageShare('rh8d_description')
+    pkg = FindPackageShare('seed_rh8d_description')
 
     # rh8d_controllers_<side>[_independent].yaml - the actuated joint set
     # differs per coupling mode.
@@ -56,7 +56,7 @@ def generate_launch_description():
                                           'controller (independent mode)'),
         DeclareLaunchArgument('rviz', default_value='false'),
 
-        # Lets gz resolve the model://rh8d_description/... mesh URIs that
+        # Lets gz resolve the model://seed_rh8d_description/... mesh URIs that
         # sdformat generates from the package:// paths.
         AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH',
                                   PathJoinSubstitution([pkg, '..'])),
@@ -85,7 +85,7 @@ def generate_launch_description():
 
         # Real-sensor semantics for the palm IR: single Range value, 0.255 m
         # when nothing is in range (the hardware reports 255, never inf).
-        Node(package='rh8d_description', executable='palm_ir_adapter.py',
+        Node(package='seed_rh8d_description', executable='palm_ir_adapter.py',
              remappings=[('scan', ['/rh8d/', side, '/palm_ir/scan']),
                          ('range', ['/rh8d/', side, '/palm_ir/range'])],
              parameters=[{'use_sim_time': True}]),
@@ -95,7 +95,7 @@ def generate_launch_description():
         # contact-adaptive wrap). Only meaningful in independent mode.
         # It also latches the generated motor panel description on
         # motor_description for the motor slider GUI.
-        Node(package='rh8d_description', executable='rh8d_coupling_node.py',
+        Node(package='seed_rh8d_description', executable='rh8d_coupling_node.py',
              condition=IfCondition(PythonExpression(
                  ["'", coupling, "' == 'independent' and '",
                   LaunchConfiguration('use_coupling'), "' == 'true'"])),
@@ -127,7 +127,7 @@ def generate_launch_description():
                   LaunchConfiguration('use_coupling'), "' != 'true') and '",
                   LaunchConfiguration('motor_gui'), "' == 'true'"])),
              parameters=[{'use_sim_time': True}]),
-        Node(package='rh8d_description', executable='joint_gui_to_trajectory.py',
+        Node(package='seed_rh8d_description', executable='joint_gui_to_trajectory.py',
              condition=IfCondition(PythonExpression(
                  ["('", coupling, "' != 'independent' or '",
                   LaunchConfiguration('use_coupling'), "' != 'true') and '",

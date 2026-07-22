@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(rh8d_description)
+project(seed_rh8d_description)
 
 find_package(ament_cmake REQUIRED)
 

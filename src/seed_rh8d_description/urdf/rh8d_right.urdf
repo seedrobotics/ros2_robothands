@@ -31,7 +31,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/forearm.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/forearm.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -44,7 +44,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/forearm_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/forearm_collision.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -65,7 +65,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/palm_axis_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/palm_axis_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -87,14 +87,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/high_res/right_palm_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/high_res/right_palm_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/right_palm_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/right_palm_collision.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -135,7 +135,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/thumb_base_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/thumb_base_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -157,7 +157,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/thumb_phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/thumb_phalanx_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -180,7 +180,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/thumb_phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/thumb_phalanx_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -215,14 +215,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/high_res/tip_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/high_res/tip_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/tip_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/tip_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -240,14 +240,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/high_res/sensor_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/high_res/sensor_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_sensor_green"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/sensor_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/sensor_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -268,7 +268,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -303,7 +303,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -338,14 +338,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/high_res/tip_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/high_res/tip_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/tip_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/tip_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -363,14 +363,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/high_res/sensor_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/high_res/sensor_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_sensor_green"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/sensor_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/sensor_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -391,7 +391,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -426,7 +426,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -461,14 +461,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/high_res/tip_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/high_res/tip_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/tip_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/tip_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -486,14 +486,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/high_res/sensor_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/high_res/sensor_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_sensor_green"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/sensor_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/sensor_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -514,7 +514,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -549,7 +549,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -584,14 +584,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/high_res/tip_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/high_res/tip_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/tip_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/tip_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -609,14 +609,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/high_res/sensor_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/high_res/sensor_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_sensor_green"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/sensor_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/sensor_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -638,7 +638,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -673,7 +673,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/phalanx_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
@@ -708,14 +708,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/high_res/tip_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/high_res/tip_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/tip_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/tip_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -733,14 +733,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/high_res/sensor_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/high_res/sensor_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="rh8d_sensor_green"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://rh8d_description/meshes/sensor_refac.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://seed_rh8d_description/meshes/sensor_refac.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>

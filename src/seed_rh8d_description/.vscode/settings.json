@@ -1,0 +1,5 @@
+{
+    "urdf-visualizer.packages": {
+        "seed_rh8d_description": "${workspaceFolder}"
+    }
+}
