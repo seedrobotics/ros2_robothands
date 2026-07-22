@@ -16,7 +16,6 @@
   <depend>dynamixel_sdk</depend>
 
   <exec_depend>python3-serial</exec_depend>
-  <exec_depend>ros2_sensor_pkg</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
