@@ -119,11 +119,16 @@ ros2 topic pub -1 /motor_commands sensor_msgs/msg/JointState \
   "{name: [r_index_flexion_joint], position: [0.7]}"
 ```
 
-Watch the real hand live in RViz (run next to `hand.launch.py`):
+Watch the real hand live in RViz (run next to `hand.launch.py`); `gui:=true`
+adds the motor slider panel — the same one as the sim's `motor_gui:=true` —
+which drives the real hand:
 
 ```bash
-ros2 launch seed_hand_bringup view.launch.py side:=right
+ros2 launch seed_hand_bringup view.launch.py side:=right gui:=true
 ```
+
+Careful: the sliders start at 0 / centered and command that pose as soon as
+the panel opens.
 
 > **Calibration**: the tick ↔ unit mapping defaults to the full motor range
 > (0–4095) over the full joint range and is **not hardware-calibrated** yet.
