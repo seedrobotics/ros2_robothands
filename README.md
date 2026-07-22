@@ -1,166 +1,150 @@
-########################################################
+# ros2_robothands
 
-Disclaimer: This ROS2 Version of the Robothands Repo is usable, but still in development.
+ROS 2 packages for the [Seed Robotics](https://www.seedrobotics.com) RH8D
+dexterous hands: hardware driver, in-hand FTS sensors, URDF description, and
+Gazebo simulation.
 
-Please Report any bugs you might encounter.
+Tested with ROS 2 Jazzy on Ubuntu 24.04.
 
-########################################################
+> **Status**: usable, but still in development. Please report any bugs you
+> encounter.
 
+## Packages
 
-# Install
+| Package | Purpose |
+|---|---|
+| `seed_hand_driver` | Hardware driver: talks to the hand's motors over serial, publishes state, accepts commands |
+| `seed_hand_msgs` | Message definitions for the driver's topics |
+| `seed_hand_bringup` | Top-level launch files: driver + optional sensors in one command |
+| `ros2_sensor_pkg` | Driver for the in-hand FTS pressure sensors (git submodule, also usable standalone) |
+| `seed_rh8d_description` | URDF/xacro model of the RH8D (left and right), meshes, RViz visualization |
+| `seed_rh8d_gazebo` | Gazebo (gz-sim) simulation: world, ros2_control configs, sim helper nodes |
+| `dynamixel_sdk` | Bundled ROBOTIS Dynamixel SDK Python bindings (the apt package is C++ only) |
 
-Clone Repo with submodules via https or ssh:
-``` bash
-git clone --recurse-submodules https://github.com/seedrobotics/ros2_robothands.git
-git clone --recurse-submodules git@github.com:seedrobotics/ros2_robothands.git
+`seed_rh8d_description` and `seed_rh8d_gazebo` have their own READMEs with
+model and simulation details.
 
+## Installation
+
+```bash
+mkdir -p ~/robothands_ws && cd ~/robothands_ws
+git clone --recurse-submodules https://github.com/seedrobotics/ros2_robothands.git .
+# or: git clone --recurse-submodules git@github.com:seedrobotics/ros2_robothands.git .
+
+source /opt/ros/jazzy/setup.bash
+rosdep install --from-paths src --ignore-src -y   # pyserial, numpy, xacro, ...
+colcon build --symlink-install
+source install/setup.bash                          # repeat in every new terminal
 ```
 
-In order to work with this package, you must intall ROS2 (tested with ROS2 Jazzy Jalisco).
-Please follow the instructions on the ROS Wiki website here https://docs.ros.org/en/jazzy/Installation.html. Please install the desktop-full version.
-Please note that this version of the package has only been tested on Ubuntu 24.04.
+For simulation you additionally need `ros-jazzy-ros-gz` and
+`ros-jazzy-gz-ros2-control` (kept out of the hard dependencies on purpose).
 
-In order to make this package work, you also need to have Python3 installed. This package have been developped using Python 3.12.3 (pre-installed in Ubuntu 24.04).
-You also need to install the following python libs :
-- rospy (should have been installed with ROS2 Jazzy)
-- std_msgs (should have been installed with ROS2 Jazzy)
-- pyserial
-- numpy
+### Serial port setup
 
-Once this is done you can clone the root folder of this project. (i.e this folder)
-Then, in this folder, open a terminal and type the following command :
+Add yourself to the `dialout` group once (then log out and back in):
 
-"colcon make"
-
-Afterwards, you NEED to SOURCE your workspace. To do so, in the root folder type
-
-source install/setup.*    (* Being your CLI, for example setup.bash)
-
-Note that if you want to use this package features in other terminal windows you will have to source each of these terminals aswell.
-
-In order to make the "seed_robotics" package to work at 50Hz, you must change the latency timer of the FTDI chip. To do so you must type the following command each time you plug something on a serial port :
-
-"sudo gedit /sys/bus/usb-serial/devices/$(YOUR_SERIAL_PORT)/latency_timer" And change the value in the file to 1.
-
-
-Now you should be able to work with the ROS Packages "seed_robotics" and "ros2_fts".
-
-
-# PROJECT DESCRIPTION 
-This project includes 2 custom ROS2 packages to ease the use of Seed Robotics products with ROS2.
-
-The first package is named "seed_robotics". It allows the user to communicate with a Seed Robotics robotic hand. Communication includes continuous reading in motors memory and making these informations available using ROS messages. This package also allows the user to write to the motors using ROS messages, the user will be able to change the position and the speed of several motors at the same time. It will also be possible to change the stiffness of a motor, to clear its hardware error and to change its shutdown conditions. The instructions for the use of this package will follow. These communications can be done by the user either using command lines, or using Python script (using the rospy library) or CPP project (using rocpp library). There are examples on how to use these different features using python scripts in the src/seed_robotics/user_samples folder. These samples will be explained later. Note that this package allows a  maximum working frequency of 50Hz.
-
-The second package is named "sensor_pkg". It eases the communication with Seed Robotics FTS3 and FTS1 pressure sensors using ROS2. The sensor_pkg can also be used alone if needed. Its features are the realtime reading of informations sent by the sensor through ROS messages. The sensor_pkg also allows the user to send command to the sensors, either via command lines or using Python script (using the rospy library) or CPP project (using rocpp library). There are examples on how to use these different features using python scripts in the src/sensor_pkg/user_example folder. These samples will be explained later.
-
-There also is a 3rd package in the src/ folder, that is the dynamixel_sdk package which is a library on which the "seed_robotics" package relies.
-
-
-
-# LAUNCHING THE PACKAGES 
-To use these packages in the correct way, you must use the "roslaunch" command line.
-In the seed_robotics package, there are 4 different launchfiles. You can find them in the /src/seed_robotics/launch/ folder.
-Each launchfile have the name "RH8D_L/R/RL.launch". The number depends on the hand model you're using. The "R/L/RL" means either "Right", "Left" or "Right and Left". As you will see, these launchfiles include a parameter called "prefix" that either as the value "R_", "L_" or "RL_". This prefix is used afterwards to name the ROS Topics accordingly. You will have more informations on the ROS Topic Names and message structures in the SEED_ROBOTICS MESSAGE STRUCTURE section of this document.
-
-As you will notice, each launchfile relies on a YAML file that describes a configuration that will be used as ROS Parameters. It means that before roslaunching anything, you must check the YAML config file related to the launchfile. Theses files are in the src/seed_robotics/config/ folder.
-These YAML file declares 4 different parameters :
-  - "baudrate" which is the communication baudrate through the serial port. This value must be 1000000
-  - "port" which is the name of the serial port on which you plugged the hand. You must edit its value to the name of your serial port.
-  - "frequency" which is the working frequency that you want. This value must be 50Hz or below.
-  - "joint_mapping" which is a dictionary that allows the mapping of the joints ID with their names. You can edit their names if you want, but if you do then the user_samples (they will be explained later) won't work because they were written using the default joints names. Also, if you changed the default IDs of the joints, you must change these IDs in this "joint_mapping" dictionnary in the YAML config file.
-
-Each launchfile has a commented part which you can uncomment to launch the sensor_pkg at the same time. If you do so, don't forget to edit the YAML config file of the sensor_pkg in the src/sensor_pkg/config/ folder. The sensor YAML config files specify only 3 parameters :
-  - "port" which is the serial port on which the sensors are connected.
-  - "hand_polarity" which value MUST be "L_" for left hand sensors and "R_" for right hand sensors. This will be usefull later to allow you to know if you are looking at the sensors value for the right hand or the left hand.
-  - "sensor_number" which is the number of sensors connected to 1 serial port. This value is usually 5 but you can change it in case you have less sensors.
-
-Please note that the "_RL" launchfiles are used if you want to use 2 hands plugged on the same serial port. With this specific case, there is one more parameter that is declared in the launchifle : it's the light_mode parameter. In the case where you want to use 2 hands on the same serial port, you won't be able to work the full seed_robotics package features at 50Hz. Then there are 2 options for you :
-  - Either you work on a lower frequency, 30Hz should work fine.
-  - Or you set the "light_mode" parameter value to "true" in the launchfile. In this mode, you will only have the basic features of the package : The features that won't be available in light mode are : current reading of the joints, reading of the main board sensors (IR distance sensor, capacitive sensors), hawdware error and temperature reading of the joints. It means that you won't get any software warning about the condition of the joints in this mode, so you must check if the red light comes on, on the hand.
-
-If you want to work with 2 hands on 2 different ports, then you have to follow the example of the RH6D_L_and_RH8D_R_with_sensors.launch launchfile. It's a launchfile that will launch 3 ROS Nodes :
-  - One for the control of a RH8D Right hand on a serial port x.
-  - One for the control of a RH6D Left hand on a serial port y.
-  - One for the control of the sensors attached to the RH8D Right hand, sensors plugged to a serial port z.
-
-
-EXAMPLE 1 :
-If you are using a single RH8D Right hand, then after building the package, sourcing your terminal tab and editing the RH8D_R.YAML file, type the command line "roslaunch seed_robotics RH8D_R.launch" to launch the package. If you have sensors attached to this hand, then you must uncomment the commented part of the RH8D_R.launch file, and edit the /src/sensor_pkg/config/sensors_right.yaml file before typing the command line.
-
-EXAMPLE 2 :
-If you just want to use the sensor_pkg features, then after building the package, sourcing your terminal tab and editing the /src/sensor_pkg/config/sensors_right/left.yaml file, type the command line : "roslaunch sensor_pkg Sensors.launch"
-
-# TROUBLESHOOTING
-
-If you have trouble with permissions on serial port (for example if you cannot open a serial port on GTKTerm), you can solve this issue by adding yourself to the dialout group. To do so, open a terminal and type :
-
+```bash
 sudo usermod -a -G dialout $USER
+```
 
-Then logout and log back for the changes to take effect.
+To reach the full 50 Hz update rate, lower the FTDI latency timer each time
+the hand is plugged in (replace `ttyUSB0` with your port):
 
+```bash
+echo 1 | sudo tee /sys/bus/usb-serial/devices/ttyUSB0/latency_timer
+```
 
+## Running the real hand
 
-# SEED_ROBOTICS FEATURES 
+1. Edit the config for your hand in `src/seed_hand_driver/config/`
+   (`RH8D_R.yaml`, `RH8D_L.yaml`, or `RH8D_RL.yaml` for two hands on one
+   port). At minimum set `port`. Parameters:
+   - `port` — serial device, e.g. `/dev/ttyUSB0`
+   - `baudrate` — must be `1000000`
+   - `frequency` — update rate in Hz, 50 maximum
+   - `light_mode` — reduced register set for higher rates with two hands on
+     one port (disables current, temperature, hardware-error, and main-board
+     sensor reading — watch the hand's red LED instead)
+   - `prefix` — topic prefix (`R_`, `L_`, or `RL_`)
+   - `joint_mapping` — joint name → motor ID (edit only if you changed motor
+     IDs; the user samples assume the default names)
+2. If using the in-hand sensors, also set the port in
+   `src/ros2_sensor_pkg/config/sensors_right.yaml` / `sensors_left.yaml`.
+3. Launch:
 
-This package is the ROS2 Package used for the control of the robotic hands from Seed Robotics.
+```bash
+ros2 launch seed_hand_bringup hand.launch.py side:=right
+ros2 launch seed_hand_bringup hand.launch.py side:=right use_sensors:=true
+ros2 launch seed_hand_bringup hand.launch.py side:=both use_sensors:=true
+```
 
-The seed_robotics package features are the following :
-  - Reading informations about every joints that are present in the hand through ROS Messages. (AllJoints messages)
-  - Reading informations about the main board, mainly about the IR distance sensor and the capacitive sensors. (AllMainBoards messages)
-  - Setting target speed and position to several joints at the same time through a ROS Message. (JointListSetSpeedPos messages)
-  - Setting the stiffness of several joints through a ROS Message. (JointListSetStiffness message) Please note that if you changed the stiffness of a joint and rebooted the program without power cycling the hand, then you won't be able to change the stiffness again without power cycling the hand.
-  - Clearing the hardware error condition of a specific joint through a ROS message. (ClearHWError message) Please note that you can't call this command twice on the same joint in less than 30 seconds.
-  - Setting the shutdown conditions of a specific joint through a ROS message. (SetShutdownCond message)
+Two hands on *different* ports: run two launches with `side:=left` and
+`side:=right` (each hand needs its own config with its own port).
 
-If you want to send a command to a joint, you must specify its name. If you use the joint's ID instead of its name it will work too.
-Joints names can be modified in the YAML config file associated to the launchfile you used.
+## Visualization and simulation
 
-About the stiffness : It is an integer value that must be between 1 and 9. Default stiffness is 8. Please note that the joints behavior on a low stiffness will imply some overshoot.
+```bash
+# RViz model inspection with joint sliders (no hardware needed)
+ros2 launch seed_rh8d_description display.launch.py side:=right
 
-# SEED_ROBOTICS MESSAGE STRUCTURE
+# Gazebo physics simulation with ros2_control
+ros2 launch seed_rh8d_gazebo gazebo.launch.py side:=right
+```
 
-The ROS message structure that stores information about the joints and the main boards is the following :
+See [src/seed_rh8d_description/README.md](src/seed_rh8d_description/README.md)
+for xacro arguments, finger-coupling modes, and how to mount the hand on a
+larger robot, and
+[src/seed_rh8d_description/INTEGRATION.md](src/seed_rh8d_description/INTEGRATION.md)
+for simulation gotchas.
 
-![plot](./docImages/ReadMessages.png)
+Note: the simulation currently uses ros2_control with different joint names
+and interfaces than the hardware driver below — code written against one does
+not yet run against the other.
 
-The ROS messages that are published by the main Node are the "AllJoints" and the "AllMainBoards" messages. Each of them have a Header including a ROS timestamp, a "length" attribute and a list, respectively "joints" and "boards". The "length" attributes specifies the length of the list.
-The "joints" list is a list of "LoneJoint" messages. Their structure is specified on the picture above. The "stress_level" value of a LoneJoint corresponds to a percentage of stress on the joint, taking into account its current and its overload filter regarding to their maximum value. The "moving" value is 0 if the joint is not moving, 1 if the joint is moving.
-The "boards" list is a list of "LoneMainBoard" messages. Their structure is specified on the picture above.
+## Driver topics
 
-If you want to receive these messages, you must initialize a ROS Node that Subscribes to the "R_AllJoints" Topic and "R_AllMainBoards" Topic if you are using a Right Hand. If you are using a Left Hand, replace the "R_" by "L_". If you are using both Right and Left Hands on the same serial port, use the "RL_" prefix. The same prefix principle applies for the other Topics.
-There are examples on how to get these data and print them in the user samples 1 (for the joints) and 6 (for the main boards). The user samples are in the folder : src/seed_robotics/user_samples.
+All topic names carry the configured prefix (`R_` below). Message structures:
 
+![read messages](docImages/ReadMessages.png)
+![write messages](docImages/WriteMessages.png)
 
-The ROS messages structure to send in order to send commands to the joints is the following :
+**Published:**
 
-![plot](./docImages/WriteMessages.png)
+| Topic | Type | Content |
+|---|---|---|
+| `R_Joints` | `seed_hand_msgs/AllJoints` | Position, speed, current, temperature, stress level, and error state of every joint |
+| `R_Main_Boards` | `seed_hand_msgs/AllMainBoards` | Palm IR distance sensor and capacitive sensors |
 
-The ClearHWError message only has the "name" attribute. If you want to clear the hardware error of a joint on a Right Hand, then you must initialize a ROS Node that publishes a ClearHWError message with the name of the joint you want to clear, to the "R_clear_error" Topic. There is an example on how to do that in the user sample 3
+**Subscribed:**
 
-The SetShutdownCond message has a "name" attribute, a "temperature" attribute and a "overload" attribute. By default, a joint will shutdown if it overloads or overheats. However, you can change it by sending a SetShutdownCond message to the 'R_shutdown_condition' Topic if you are using a Right Hand. If you want the joint to not shutdown when overloading, then send a message with the name of the joint and the "overload" attribute set to False. There is an example of that in the user sample 5.
+| Topic | Type | Action |
+|---|---|---|
+| `R_speed_position` | `seed_hand_msgs/JointListSetSpeedPos` | Set target position (0–4095) and speed (0–1023, `-1` keeps previous) for several joints at once |
+| `R_stiffness` | `seed_hand_msgs/JointListSetStiffness` | Set joint stiffness (1–9, default 8; low values overshoot). Changing stiffness twice requires a power cycle in between |
+| `R_clear_error` | `seed_hand_msgs/ClearHWError` | Clear a joint's hardware error (at most once per 30 s per joint) |
+| `R_shutdown_condition` | `seed_hand_msgs/SetShutdownCond` | Configure shutdown on overload / overtemperature per joint |
 
-The JointListSetSpeedPos message has a "joints" attribute that is a List of "JointSetSpeedPos" messages. If you want to modify the target position and speed of several joints, you must :
-  - Initialize a ROS Node that will publish on the 'R_speed_position' Topic (if using a Right hand)
-  - Declare a list of JointSetSpeedPos and fill each one of them with their name, wanted position and wanted speed. Please note that speed must be between 0 and 1023, and position must be between 0 and 4095. If you set the target speed to '-1', it will keep the previous target speed.
-  - Declare a JointListSetSpeedPos instance, fill it with the JointSetSpeedPos List.
-  - Send the JointListSetSpeedPos message.
-There is an example on how to do it in the user sample 2.
+Joints are addressed by name (or numeric ID) as defined in the config's
+`joint_mapping`.
 
-The JointListSetStiffness message have a "joints" attribute that is a list of SetStiffness messages. If you want to modify the stiffness of several joints you must :
-- Initialize a ROS Node that will publish on the 'R_stiffness' Topic (if using a Right hand)
-- Declare a list of SetStiffness and fill each one of them with their name and stiffness value. Note that the stiffness value must be between 1 and 9. Default stiffness is 8. Be aware that low stiffness can imply some overshoot.
-- Declare a JointListSetStiffness instance, fill it with the SetStiffness List.
-- Send the JointListSetStiffness message.
-There is an example on how to do it in the user sample 4.
+## Examples
 
-# USER SAMPLES 
+Runnable scripts in `src/seed_hand_driver/user_samples/` (`_L` variants for
+the left hand):
 
-As it has been said, there are several user samples that are available for you to see how to use that package.
-These user samples are in the src/seed_robotics/user_samples folder.
-There are 10 different samples : 6 basic ones that have been referenced in the previous section, 2 more complex ones and 2 that uses both sensor_pkg and seed_robotics packages.
+- `user_sample_1_get_values.py` — subscribe and print all joint states
+- `user_sample_2_set_speed_position_R.py` — command positions/speeds (opens the hand)
+- `user_sample_7_RH8D_R_grab_object.py` — autonomous grab: watches the palm
+  IR sensor, closes on an object, stops fingers on current threshold, holds,
+  releases
 
-The 2 complex ones are the following:
- - user sample 1: A simple listener that prints available information of all joints.
- - user sample 2: A simple publisher, that opens the hand. 
- - user sample 7: The principle of this one is to continuously check the value of the IR distance sensor in the palm of the hand. If this value goes below a threshold, then it means there is an object in the Hand. So the program sends a command to close the fingers. Once this is done, the program is continuously checking current values of every joints. Whenever a joint's current goes above a certain threshold, it sets its target position to its present position so it stops stressing. If 3 joints or more are in this situation, we hold the object for 5 seconds then open every fingers.
+## Troubleshooting
 
+- **Permission denied on the serial port** — add yourself to `dialout` (see
+  above).
+- **Driver logs `TIME PERIOD EXCEEDED`** — the configured `frequency` is too
+  high for the setup; lower it (~30 Hz for two hands on one port) or enable
+  `light_mode`.
+- **Sensors on the wrong hand** — `hand_polarity` in the sensor YAML must be
+  `L_` or `R_` to match the hand the sensors are mounted on.
