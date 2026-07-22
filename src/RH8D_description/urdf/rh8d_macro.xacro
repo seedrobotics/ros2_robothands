@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find rh8d_description)/urdf/rh8d_materials.xacro"/>
+  <xacro:include filename="$(find rh8d_description)/urdf/rh8d_finger.xacro"/>
+
+  <!--
+    Seed Robotics RH8D hand.
+
+    prefix:             link/joint name prefix, e.g. 'l_' or 'r_'
+    side:               'left' | 'right' (mesh selection and mirroring)
+    parent:             link the hand is mounted to
+    *origin:            mount pose (origin block of the wrist rotation joint)
+    finger_coupling:    'mimic'       - phalanges follow the proximal joint
+                                        linearly (8-DOF interface, safe with all
+                                        standard tools)
+                        'independent' - every phalanx joint actuated; combine
+                                        with rh8d_coupling_node.py for
+                                        tendon-like sequential/adaptive closing
+    couple_ring_little: ring and little finger share one actuator (matches the
+                        real hand); ignored in 'independent' mode
+  -->
+  <xacro:macro name="rh8d" params="prefix side parent *origin finger_coupling:=mimic couple_ring_little:=true">
+
+    <xacro:property name="reflect" value="${1 if side == 'left' else -1}"/>
+    <xacro:property name="couple"  value="${couple_ring_little in [True, 'true', 'True', '1', 1]}"/>
+
+    <!-- ======================= wrist chain ======================= -->
+    <joint name="${prefix}wrist_rotation_joint" type="revolute">
+      <xacro:insert_block name="origin"/>
+      <parent link="${parent}"/>
+      <child link="${prefix}forearm"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="10" lower="${-pi/2}" upper="${pi/2}" velocity="6"/>
+    </joint>
+    <link name="${prefix}forearm">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0.07907642"/>
+        <mass value="0.400"/>
+        <inertia ixx="9.5374e-04" ixy="0.0" ixz="0.0" iyy="9.5374e-04" iyz="0.0" izz="2.4e-04"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/forearm.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="rh8d_black"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0.01"/>
+        <geometry>
+          <cylinder length="0.019" radius="0.025"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/forearm_collision.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}wrist_adduction_joint" type="revolute">
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0.184"/>
+      <parent link="${prefix}forearm"/>
+      <child link="${prefix}palm_axis"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="30" lower="${-pi/4}" upper="${pi/4}" velocity="6"/>
+      <dynamics damping="1" friction="0.0"/>
+    </joint>
+    <link name="${prefix}palm_axis">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.100"/>
+        <inertia ixx="1.022e-05" ixy="0.0" ixz="0.0" iyy="2.764e-05" iyz="0.0" izz="2.764e-05"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/palm_axis_refac.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="rh8d_black"/>
+      </visual>
+    </link>
+
+    <joint name="${prefix}wrist_flexion_joint" type="revolute">
+      <origin rpy="0 ${pi/2} 0" xyz="0 0 0"/>
+      <parent link="${prefix}palm_axis"/>
+      <child link="${prefix}palm"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="30" lower="${-pi/4}" upper="${pi/4}" velocity="6"/>
+      <dynamics damping="1" friction="0.0"/>
+    </joint>
+    <link name="${prefix}palm">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 0.030 0"/>
+        <mass value="0.300"/>
+        <inertia ixx="3.1096e-04" ixy="0.0" ixz="0.0" iyy="2.3191e-04" iyz="0.0" izz="1.0095e-04"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/high_res/${side}_palm_refac.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="rh8d_black"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rh8d_description/meshes/${side}_palm_collision.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- tool frame on the palm (grasp frame) -->
+    <joint name="${prefix}tool0_joint" type="fixed">
+      <origin rpy="${-0.06*reflect} ${0.04*reflect} -2.92922802"
+              xyz="-0.0011171786 0.0818708881 ${0.0130285291*reflect}"/>
+      <parent link="${prefix}palm"/>
+      <child link="${prefix}tool0"/>
+    </joint>
+    <link name="${prefix}tool0"/>
+
+    <!-- palm IR distance sensor frame -->
+    <joint name="${prefix}palm_ir_joint" type="fixed">
+      <origin rpy="0 0 ${pi}" xyz="-0.00030337 0.04498324 0"/>
+      <parent link="${prefix}palm"/>
+      <child link="${prefix}palm_ir"/>
+    </joint>
+    <link name="${prefix}palm_ir">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="1e-06" ixy="0.0" ixz="0.0" iyy="1e-06" iyz="0.0" izz="1e-06"/>
+      </inertial>
+    </link>
+
+    <xacro:property name="little_leader"
+        value="${prefix + 'ring_proximal_joint' if (couple and finger_coupling == 'mimic') else ''}"/>
+
+    <!-- ======================= thumb ======================= -->
+    <!-- The thumb abduction mount is calibrated per side (not an exact mirror). -->
+    <xacro:if value="${side == 'left'}">
+      <xacro:rh8d_thumb prefix="${prefix}" coupling="${finger_coupling}"
+                        mount_xyz="-0.0083412575 0.0157859987 -0.0379541955"
+                        mount_rpy="0.60093862 -0.59510795 -2.8183247"
+                        mount_axis="0 0 1"/>
+    </xacro:if>
+    <xacro:if value="${side == 'right'}">
+      <xacro:rh8d_thumb prefix="${prefix}" coupling="${finger_coupling}"
+                        mount_xyz="-0.0083412575 0.0157859987 0.0379541955"
+                        mount_rpy="-2.54680616 -0.60124514 0.33418237"
+                        mount_axis="0 0 -1"/>
+    </xacro:if>
+
+    <!-- ======================= fingers ======================= -->
+    <xacro:rh8d_finger prefix="${prefix}" finger="index" coupling="${finger_coupling}"
+                       mount_xyz="-0.0043044918 0.0812907302 ${-0.0367863551*reflect}"
+                       mount_rpy="${0.08267713*reflect} ${-0.17715231*reflect} -2.93857995"/>
+    <xacro:rh8d_finger prefix="${prefix}" finger="middle" coupling="${finger_coupling}"
+                       mount_xyz="-0.0012008743 0.0828960623 ${-0.0118294206*reflect}"
+                       mount_rpy="${0.02*reflect} ${-0.06*reflect} -2.92246721"/>
+    <xacro:rh8d_finger prefix="${prefix}" finger="ring" coupling="${finger_coupling}"
+                       mount_xyz="-0.0011171786 0.0818708881 ${0.0130285291*reflect}"
+                       mount_rpy="${-0.06*reflect} ${0.04*reflect} -2.92922802"/>
+    <xacro:rh8d_finger prefix="${prefix}" finger="little" coupling="${finger_coupling}"
+                       leader="${little_leader}"
+                       mount_xyz="-0.0031705239 0.0731417977 ${0.0376310382*reflect}"
+                       mount_rpy="${-0.14*reflect} ${0.17*reflect} -2.95156384"/>
+
+  </xacro:macro>
+
+</robot>

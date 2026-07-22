@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Gazebo (gz-sim / Harmonic) extensions for the RH8D hand: contact
+       parameters, fingertip force_torque sensors and the palm IR distance
+       sensor. Include via the rh8d_gazebo macro after instantiating rh8d. -->
+
+  <!-- Contact parameters. The original NICOL values (mu 500, kp 1e7, kd 1)
+       were tuned for Gazebo Classic/ODE and cause violent contact explosions
+       in bullet-featherstone (deep-penetration recovery on the very light
+       finger links); realistic friction and a soft, damped contact keep
+       grasping stable. -->
+  <xacro:macro name="rh8d_link_friction" params="link mu:=1.2">
+    <gazebo reference="${link}">
+      <mu1>${mu}</mu1>
+      <mu2>${mu}</mu2>
+      <kp>100000.0</kp>
+      <kd>10.0</kd>
+      <self_collide>1</self_collide>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Fingertip pad: keep the fixed joint out of sdformat's fixed-joint
+       lumping and attach a 3-axis force/torque sensor to it. The wrench is
+       measured in the sensor pad frame: z is the pad normal, x/y are shear. -->
+  <xacro:macro name="rh8d_fingertip_ft" params="prefix side finger">
+    <gazebo reference="${prefix}${finger}_fingertip_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+      <sensor name="${prefix}${finger}_fingertip_ft" type="force_torque">
+        <always_on>true</always_on>
+        <update_rate>100</update_rate>
+        <topic>rh8d/${side}/fingertip/${finger}/wrench</topic>
+        <force_torque>
+          <frame>sensor</frame>
+          <measure_direction>child_to_parent</measure_direction>
+        </force_torque>
+      </sensor>
+    </gazebo>
+    <!-- rubber sensor pads grip better than the plastic shells -->
+    <xacro:rh8d_link_friction link="${prefix}${finger}_fingertip" mu="1.5"/>
+  </xacro:macro>
+
+  <xacro:macro name="rh8d_finger_friction" params="prefix finger">
+    <xacro:rh8d_link_friction link="${prefix}${finger}_proximal"/>
+    <xacro:rh8d_link_friction link="${prefix}${finger}_medial"/>
+    <xacro:rh8d_link_friction link="${prefix}${finger}_distal"/>
+  </xacro:macro>
+
+  <xacro:macro name="rh8d_gazebo" params="prefix side">
+
+    <!-- Publishes ALL joint positions (including mimic followers, which are
+         not part of ros2_control) on <world>/model/<name>/joint_state; the
+         shipped bridge configs map it to /joint_states so RViz gets complete
+         TF during simulation. -->
+    <gazebo>
+      <plugin filename="gz-sim-joint-state-publisher-system"
+              name="gz::sim::systems::JointStatePublisher"/>
+    </gazebo>
+
+    <xacro:rh8d_link_friction link="${prefix}forearm"/>
+    <xacro:rh8d_link_friction link="${prefix}palm_axis"/>
+    <xacro:rh8d_link_friction link="${prefix}palm"/>
+    <xacro:rh8d_link_friction link="${prefix}thumb_base"/>
+    <xacro:rh8d_finger_friction prefix="${prefix}" finger="thumb"/>
+    <xacro:rh8d_finger_friction prefix="${prefix}" finger="index"/>
+    <xacro:rh8d_finger_friction prefix="${prefix}" finger="middle"/>
+    <xacro:rh8d_finger_friction prefix="${prefix}" finger="ring"/>
+    <xacro:rh8d_finger_friction prefix="${prefix}" finger="little"/>
+
+    <xacro:rh8d_fingertip_ft prefix="${prefix}" side="${side}" finger="thumb"/>
+    <xacro:rh8d_fingertip_ft prefix="${prefix}" side="${side}" finger="index"/>
+    <xacro:rh8d_fingertip_ft prefix="${prefix}" side="${side}" finger="middle"/>
+    <xacro:rh8d_fingertip_ft prefix="${prefix}" side="${side}" finger="ring"/>
+    <xacro:rh8d_fingertip_ft prefix="${prefix}" side="${side}" finger="little"/>
+
+    <!-- Palm IR distance sensor (3-254 mm). Modeled as a small lidar fan at
+         zero spread; average the ranges to get the distance reading. -->
+    <gazebo reference="${prefix}palm_ir_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <gazebo reference="${prefix}palm_ir">
+      <sensor name="${prefix}palm_ir_sensor" type="gpu_lidar">
+        <always_on>true</always_on>
+        <update_rate>50</update_rate>
+        <visualize>false</visualize>
+        <topic>rh8d/${side}/palm_ir/scan</topic>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>5</samples>
+              <resolution>1</resolution>
+              <min_angle>0</min_angle>
+              <max_angle>0</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.003</min>
+            <max>0.254</max>
+            <resolution>0.001</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>

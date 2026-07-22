@@ -1,0 +1,28 @@
+# Controllers for the left RH8D with the default finger_coupling:=mimic
+# (8 actuated joints, matching the real hand's motor layout).
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    hand_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+hand_controller:
+  ros__parameters:
+    joints:
+      - l_wrist_rotation_joint
+      - l_wrist_adduction_joint
+      - l_wrist_flexion_joint
+      - l_thumb_abduction_joint
+      - l_thumb_proximal_joint
+      - l_index_proximal_joint
+      - l_middle_proximal_joint
+      - l_ring_proximal_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity

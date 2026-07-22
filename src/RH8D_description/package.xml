@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>rh8d_description</name>
+  <version>0.1.0</version>
+  <description>
+    URDF/xacro description of the Seed Robotics RH8D robotic hand (left and
+    right), with ros2_control and Gazebo (gz-sim) support. Geometry derived
+    from the NICOL robot description by Nicolas Frick (MIT license).
+  </description>
+  <maintainer email="marco@seedrobotics.com">Marco</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>urdf</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>joint_state_publisher_gui</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+
+  <!-- Simulation (only needed when spawning with use_gazebo:=true):
+       gz_ros2_control, ros_gz_sim, ros_gz_bridge. Kept out of the hard
+       dependency list so the description stays lightweight. -->
+
+  <test_depend>liburdfdom-tools</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
