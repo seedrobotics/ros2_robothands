@@ -476,7 +476,7 @@ class HandControllerNode(Node):
                 if j.name == joint.name:
                     self.joints[idx].stiffness = stiffness
 
-        self.get_logger().info('Stiffness write IDs: %s' % str(self._stiff_ids))
+        self.get_logger().debug('Stiffness write IDs: %s' % str(self._stiff_ids))
         for idx, dxl_id in enumerate(self._stiff_ids):
             if not self._gsw_stiff.addParam(dxl_id, self._stiff_params[idx]):
                 self.get_logger().error('[ID:%d] gsw_stiff addParam failed' % dxl_id)
@@ -491,11 +491,11 @@ class HandControllerNode(Node):
         self._gsw_sp.clearParam()
         self._sp_ids.clear(); self._sp_params.clear()
 
+        decoded = []
         for joint in msg.joints:
             dxl_id = self._id(joint.name)
-            self.get_logger().info('speed_pos: "%s" → ID %s' % (joint.name, dxl_id))
             if dxl_id == 'None':
-                return
+                continue  # skip unmapped joints, keep the rest of the command
             self._sp_ids.append(dxl_id)
             target_pos = joint.target_pos
             if joint.target_speed < 0:
@@ -507,12 +507,16 @@ class HandControllerNode(Node):
                         break
             else:
                 target_speed = joint.target_speed
+            decoded.append('%s[%d]→pos=%d spd=%d' %
+                           (joint.name, dxl_id, target_pos, target_speed))
             self._sp_params.append([
                 DXL_LOBYTE(DXL_LOWORD(target_pos)),
                 DXL_HIBYTE(DXL_LOWORD(target_pos)),
                 DXL_LOBYTE(DXL_LOWORD(target_speed)),
                 DXL_HIBYTE(DXL_LOWORD(target_speed)),
             ])
+        if decoded:
+            self.get_logger().debug('speed_pos: ' + ', '.join(decoded))
 
         for idx, dxl_id in enumerate(self._sp_ids):
             if not self._gsw_sp.addParam(dxl_id, self._sp_params[idx]):
@@ -619,11 +623,11 @@ class HandControllerNode(Node):
             self._flags.WRITE_STIFFNESS = False
 
         elif self._flags.WRITE_SPEED_POS:
-            self.get_logger().info(str(self._gsw_sp.data_dict))
+            # raw sync-write payload per ID: [pos_lo, pos_hi, spd_lo, spd_hi]
+            self.get_logger().debug('gsw_sp bytes: %s' % str(self._gsw_sp.data_dict))
             res = self._gsw_sp.txPacket()
             if res != COMM_SUCCESS:
                 self.get_logger().warn('gsw_sp: %s' % self._packet.getTxRxResult(res))
-            self.get_logger().info('WRITING SPEED/POS')
             self._flags.WRITE_SPEED_POS = False
 
         # ── 4. Read main board (only if time remains and not in light mode) ──
