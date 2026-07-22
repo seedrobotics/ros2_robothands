@@ -92,9 +92,11 @@ the same topics the Gazebo simulation publishes — stamped in the model's
 fingertip frames (add a Wrench display in RViz for live force arrows).
 `plot:=true` opens PlotJuggler with a prepared fingertip layout
 (`seed_hand_bringup/config/fingertips.xml`, right hand; the layout works
-identically against the simulation). Raw sensor counts are published
-unscaled until `force_scale` is calibrated; if the sensors are cabled in a
-different order, adjust the adapter's `finger_order` parameter.
+identically against the simulation). The adapter's `force_scale`
+(default 0.01) roughly maps raw counts near the newton range — replace it
+with the measured counts-per-newton factor once calibrated. If the sensors
+are cabled in a different order, adjust the adapter's `finger_order`
+parameter.
 
 Two hands on *different* ports: run two launches with `side:=left` and
 `side:=right` (each hand needs its own config with its own port).

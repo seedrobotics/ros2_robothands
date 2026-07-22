@@ -14,8 +14,10 @@ Sensors are matched by their id field (wire index), not array position - the
 driver omits absent sensors from the array. finger_order maps wire index ->
 finger name; adjust it if the sensors are cabled differently.
 
-force_scale converts raw counts to the published unit and is NOT calibrated
-by default (1.0 = raw counts, nominally newtons after calibration).
+force_scale converts raw counts to the published unit. The default 0.01 is
+a ROUGH pre-calibration that brings typical count magnitudes near the
+newton range the sim publishes (so shared RViz/PlotJuggler configs work);
+replace it with the measured counts-per-newton factor once calibrated.
 """
 import rclpy
 from rclpy.node import Node
@@ -32,7 +34,7 @@ class SensorWrenchAdapter(Node):
         super().__init__('sensor_wrench_adapter')
         side = self.declare_parameter('side', 'right').value
         order = self.declare_parameter('finger_order', FINGERS).value
-        self.scale = self.declare_parameter('force_scale', 1.0).value
+        self.scale = self.declare_parameter('force_scale', 0.01).value
         topic_prefix = {'left': 'L_', 'right': 'R_'}[side]
         jp = side[0] + '_'
 
@@ -47,7 +49,8 @@ class SensorWrenchAdapter(Node):
                                  self.on_sensors, 10)
         self.get_logger().info(
             f'publishing /rh8d/{side}/fingertip/<finger>/wrench for '
-            f'{order} (force_scale={self.scale}, uncalibrated=raw counts)')
+            f'{order} (force_scale={self.scale}, rough default - not a '
+            'measured counts-per-newton calibration)')
 
     def on_sensors(self, msg):
         for s in msg.data:
