@@ -14,18 +14,35 @@ Sensors are matched by their id field (wire index), not array position - the
 driver omits absent sensors from the array. finger_order maps wire index ->
 finger name; adjust it if the sensors are cabled differently.
 
-force_scale converts raw counts to the published unit. The default 0.01 is
-a ROUGH pre-calibration that brings typical count magnitudes near the
-newton range the sim publishes (so shared RViz/PlotJuggler configs work);
-replace it with the measured counts-per-newton factor once calibrated.
+Processing pipeline (raw counts -> published wrench):
+  1. tare      subtract the per-sensor rest bias. Auto-tared from the first
+               tare_samples messages after startup (keep the fingertips
+               unloaded!); re-zero anytime:
+                   ros2 service call /sensor_wrench_adapter_right/tare \
+                       std_srvs/srv/Trigger
+  2. scale     force_scale converts counts to the published unit. The
+               default 0.01 roughly lands typical counts near the newton
+               range the sim publishes; replace with the measured
+               counts-per-newton factor once calibrated.
+  3. remap     axis_map rotates the sensor axes into the fingertip frame,
+               e.g. ['y', '-x', 'z'] means: fingertip x = sensor y,
+               fingertip y = -sensor x, fingertip z = sensor z. Determine
+               empirically (press straight on a pad, make the arrow point
+               along the pad normal).
+  4. deadband  |F| < min_force (published units) publishes a zero wrench,
+               so noise does not draw arrows in RViz. 0 disables.
 """
+import math
+
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import WrenchStamped
+from std_srvs.srv import Trigger
 
 from ros2_sensor_pkg.msg import AllSensors
 
 FINGERS = ['thumb', 'index', 'middle', 'ring', 'little']
+AXES = {'x': 0, 'y': 1, 'z': 2}
 
 
 class SensorWrenchAdapter(Node):
@@ -35,33 +52,83 @@ class SensorWrenchAdapter(Node):
         side = self.declare_parameter('side', 'right').value
         order = self.declare_parameter('finger_order', FINGERS).value
         self.scale = self.declare_parameter('force_scale', 0.01).value
+        self.min_force = self.declare_parameter('min_force', 0.5).value
+        self.tare_samples = self.declare_parameter('tare_samples', 25).value
+        axis_map = self.declare_parameter('axis_map', ['x', 'y', 'z']).value
         topic_prefix = {'left': 'L_', 'right': 'R_'}[side]
         jp = side[0] + '_'
 
-        self.finger_by_id = dict(enumerate(order))
+        # output axis i takes sign*input_axis[src]
+        self.remap = []
+        for spec in axis_map:
+            sign = -1.0 if spec.startswith('-') else 1.0
+            self.remap.append((AXES[spec.lstrip('-')], sign))
+
         self.frame_by_id = {i: f'{jp}{f}_fingertip' for i, f in enumerate(order)}
         self.pub_by_id = {
             i: self.create_publisher(
                 WrenchStamped, f'/rh8d/{side}/fingertip/{f}/wrench', 10)
             for i, f in enumerate(order)}
 
+        self.bias = {}        # id -> (fx, fy, fz) rest offset in counts
+        self._tare_acc = {}   # id -> [n, sum_fx, sum_fy, sum_fz]
+        self._taring = self.tare_samples > 0
+
         self.create_subscription(AllSensors, topic_prefix + 'AllSensors',
                                  self.on_sensors, 10)
+        self.create_service(Trigger, '~/tare', self.on_tare)
         self.get_logger().info(
-            f'publishing /rh8d/{side}/fingertip/<finger>/wrench for '
-            f'{order} (force_scale={self.scale}, rough default - not a '
-            'measured counts-per-newton calibration)')
+            f'publishing /rh8d/{side}/fingertip/<finger>/wrench for {order} '
+            f'(force_scale={self.scale} [rough default, not calibrated], '
+            f'min_force={self.min_force}, axis_map={axis_map}, '
+            f'auto-taring over first {self.tare_samples} samples - keep '
+            'fingertips unloaded)')
+
+    def on_tare(self, request, response):
+        self._tare_acc.clear()
+        self._taring = True
+        response.success = True
+        response.message = f'taring over the next {self.tare_samples} samples'
+        return response
+
+    def _accumulate_tare(self, sensors):
+        done = True
+        for s in sensors:
+            acc = self._tare_acc.setdefault(s.id, [0, 0.0, 0.0, 0.0])
+            if acc[0] < self.tare_samples:
+                acc[0] += 1
+                acc[1] += s.fx
+                acc[2] += s.fy
+                acc[3] += s.fz
+            if acc[0] < self.tare_samples:
+                done = False
+        if done and self._tare_acc:
+            self.bias = {sid: (a[1] / a[0], a[2] / a[0], a[3] / a[0])
+                         for sid, a in self._tare_acc.items()}
+            self._taring = False
+            self.get_logger().info(
+                'tare done: ' + ', '.join(
+                    f'{sid}:({b[0]:.0f},{b[1]:.0f},{b[2]:.0f})'
+                    for sid, b in sorted(self.bias.items())))
 
     def on_sensors(self, msg):
-        for s in msg.data:
-            if not s.is_present or s.id not in self.pub_by_id:
-                continue
+        present = [s for s in msg.data
+                   if s.is_present and s.id in self.pub_by_id]
+        if self._taring:
+            self._accumulate_tare(present)
+            return  # publish nothing until the zero level is known
+        for s in present:
+            bias = self.bias.get(s.id, (0.0, 0.0, 0.0))
+            raw = ((s.fx - bias[0]) * self.scale,
+                   (s.fy - bias[1]) * self.scale,
+                   (s.fz - bias[2]) * self.scale)
+            f = [sign * raw[src] for src, sign in self.remap]
+            if math.hypot(*f) < self.min_force:
+                f = [0.0, 0.0, 0.0]
             w = WrenchStamped()
             w.header.stamp = msg.header.stamp
             w.header.frame_id = self.frame_by_id[s.id]
-            w.wrench.force.x = s.fx * self.scale
-            w.wrench.force.y = s.fy * self.scale
-            w.wrench.force.z = s.fz * self.scale
+            w.wrench.force.x, w.wrench.force.y, w.wrench.force.z = f
             self.pub_by_id[s.id].publish(w)
 
 

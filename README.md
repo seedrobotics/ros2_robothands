@@ -92,11 +92,14 @@ the same topics the Gazebo simulation publishes — stamped in the model's
 fingertip frames (add a Wrench display in RViz for live force arrows).
 `plot:=true` opens PlotJuggler with a prepared fingertip layout
 (`seed_hand_bringup/config/fingertips.xml`, right hand; the layout works
-identically against the simulation). The adapter's `force_scale`
-(default 0.01) roughly maps raw counts near the newton range — replace it
-with the measured counts-per-newton factor once calibrated. If the sensors
-are cabled in a different order, adjust the adapter's `finger_order`
-parameter.
+identically against the simulation). The adapter processes raw counts in four steps, each a parameter:
+auto-**tare** on startup (keep fingertips unloaded; re-zero anytime with
+`ros2 service call /sensor_wrench_adapter_right/tare std_srvs/srv/Trigger`),
+**force_scale** (default 0.01, roughly newton-range — replace with the
+measured counts-per-newton factor once calibrated), **axis_map** to rotate
+the sensor axes into the fingertip frame (e.g. `['y','-x','z']`), and a
+**min_force** deadband (default 0.5) so noise doesn't draw arrows. If the
+sensors are cabled in a different order, adjust `finger_order`.
 
 Two hands on *different* ports: run two launches with `side:=left` and
 `side:=right` (each hand needs its own config with its own port).
