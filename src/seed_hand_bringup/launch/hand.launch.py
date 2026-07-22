@@ -114,6 +114,21 @@ def setup(context, *args, **kwargs):
                         FindPackageShare('ros2_sensor_pkg'), 'config', f'sensors_{s}.yaml']),
                 }.items(),
             ))
+            # per-finger WrenchStamped on the sim's topic names
+            actions.append(Node(
+                package='seed_hand_bringup',
+                executable='sensor_wrench_adapter',
+                name=f'sensor_wrench_adapter_{s}',
+                output='screen',
+                parameters=[{'side': s}],
+            ))
+
+    if cfg['plot'].lower() == 'true':
+        actions.append(Node(
+            package='plotjuggler', executable='plotjuggler',
+            arguments=['-n', '-l', PathJoinSubstitution([
+                FindPackageShare('seed_hand_bringup'), 'config', 'fingertips.xml'])],
+        ))
 
     return actions
 
@@ -134,5 +149,8 @@ def generate_launch_description():
         DeclareLaunchArgument('motor_gui', default_value='false',
                               description='Motor slider panel commanding the real '
                                           'hand (same panel as the sim)'),
+        DeclareLaunchArgument('plot', default_value='false',
+                              description='Open PlotJuggler with the fingertip '
+                                          'sensor layout'),
         OpaqueFunction(function=setup),
     ])

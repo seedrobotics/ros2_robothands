@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root>
+ <tabbed_widget parent="main_window" name="Main Window">
+  <Tab tab_name="fingertips right" containers="1">
+   <Container>
+    <DockSplitter orientation="-" count="3" sizes="0.34;0.33;0.33">
+     <DockArea name="normal force fz">
+      <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+       <range left="0" right="10" top="100" bottom="-100"/>
+       <limitY/>
+       <curve color="#1f77b4" name="/rh8d/right/fingertip/thumb/wrench/wrench/force/z"/>
+       <curve color="#d62728" name="/rh8d/right/fingertip/index/wrench/wrench/force/z"/>
+       <curve color="#2ca02c" name="/rh8d/right/fingertip/middle/wrench/wrench/force/z"/>
+       <curve color="#ff7f0e" name="/rh8d/right/fingertip/ring/wrench/wrench/force/z"/>
+       <curve color="#9467bd" name="/rh8d/right/fingertip/little/wrench/wrench/force/z"/>
+      </plot>
+     </DockArea>
+     <DockArea name="shear fx">
+      <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+       <range left="0" right="10" top="100" bottom="-100"/>
+       <limitY/>
+       <curve color="#1f77b4" name="/rh8d/right/fingertip/thumb/wrench/wrench/force/x"/>
+       <curve color="#d62728" name="/rh8d/right/fingertip/index/wrench/wrench/force/x"/>
+       <curve color="#2ca02c" name="/rh8d/right/fingertip/middle/wrench/wrench/force/x"/>
+       <curve color="#ff7f0e" name="/rh8d/right/fingertip/ring/wrench/wrench/force/x"/>
+       <curve color="#9467bd" name="/rh8d/right/fingertip/little/wrench/wrench/force/x"/>
+      </plot>
+     </DockArea>
+     <DockArea name="shear fy">
+      <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+       <range left="0" right="10" top="100" bottom="-100"/>
+       <limitY/>
+       <curve color="#1f77b4" name="/rh8d/right/fingertip/thumb/wrench/wrench/force/y"/>
+       <curve color="#d62728" name="/rh8d/right/fingertip/index/wrench/wrench/force/y"/>
+       <curve color="#2ca02c" name="/rh8d/right/fingertip/middle/wrench/wrench/force/y"/>
+       <curve color="#ff7f0e" name="/rh8d/right/fingertip/ring/wrench/wrench/force/y"/>
+       <curve color="#9467bd" name="/rh8d/right/fingertip/little/wrench/wrench/force/y"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <currentTabIndex index="0"/>
+ </tabbed_widget>
+ <use_relative_time_offset enabled="1"/>
+ <!-- prompt to start the ROS 2 live subscriber when the layout loads -->
+ <Plugins>
+  <plugin ID="ROS2 Topic Subscriber">
+   <use_header_stamp value="false"/>
+   <discard_large_arrays value="true"/>
+   <max_array_size value="100"/>
+   <boolean_strings_to_number value="true"/>
+   <remove_suffix_from_strings value="true"/>
+  </plugin>
+ </Plugins>
+ <previouslyLoaded_Streamer name="ROS2 Topic Subscriber"/>
+</root>

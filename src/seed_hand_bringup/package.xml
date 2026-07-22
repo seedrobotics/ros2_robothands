@@ -4,9 +4,9 @@
   <name>seed_hand_bringup</name>
   <version>0.1.0</version>
   <description>
-    Top-level launch files for Seed Robotics hands: hand driver plus
-    optional in-hand FTS sensors, selected by side. Contains no nodes of
-    its own.
+    Top-level launch files and glue nodes for Seed Robotics hands: hand
+    driver plus optional in-hand FTS sensors, visualization, motor GUI,
+    and sensor plotting, selected by launch flags.
   </description>
   <maintainer email="marco@seedrobotics.com">Marco</maintainer>
   <license>BSD</license>
@@ -15,6 +15,9 @@
 
   <exec_depend>seed_hand_driver</exec_depend>
   <exec_depend>ros2_sensor_pkg</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>plotjuggler_ros</exec_depend>
   <exec_depend>seed_rh8d_description</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>joint_state_publisher_gui</exec_depend>

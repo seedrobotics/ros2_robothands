@@ -84,6 +84,18 @@ ros2 launch seed_hand_bringup hand.launch.py side:=right rviz:=true motor_gui:=t
 same motor slider panel as the sim's `gazebo.launch.py` (single sides only,
 not `both`).
 
+### Fingertip sensor data
+
+With `use_sensors:=true` the fingertip forces are also republished as
+`geometry_msgs/WrenchStamped` on `/rh8d/<side>/fingertip/<finger>/wrench` —
+the same topics the Gazebo simulation publishes — stamped in the model's
+fingertip frames (add a Wrench display in RViz for live force arrows).
+`plot:=true` opens PlotJuggler with a prepared fingertip layout
+(`seed_hand_bringup/config/fingertips.xml`, right hand; the layout works
+identically against the simulation). Raw sensor counts are published
+unscaled until `force_scale` is calibrated; if the sensors are cabled in a
+different order, adjust the adapter's `finger_order` parameter.
+
 Two hands on *different* ports: run two launches with `side:=left` and
 `side:=right` (each hand needs its own config with its own port).
 
