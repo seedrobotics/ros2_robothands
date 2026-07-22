@@ -9,17 +9,14 @@
   <author email="lucas.combe@gmail.com">Lucas Combe</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <buildtool_depend>rosidl_default_generators</buildtool_depend>
 
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
+  <depend>seed_hand_msgs</depend>
   <depend>dynamixel_sdk</depend>
 
-  <exec_depend>rosidl_default_runtime</exec_depend>
   <exec_depend>python3-serial</exec_depend>
   <exec_depend>ros2_sensor_pkg</exec_depend>
-
-  <member_of_group>rosidl_interface_packages</member_of_group>
 
   <export>
     <build_type>ament_cmake</build_type>

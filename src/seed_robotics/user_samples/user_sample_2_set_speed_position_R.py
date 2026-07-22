@@ -3,7 +3,7 @@
 
 import rclpy
 from rclpy.node import Node
-from seed_robotics.msg import JointListSetSpeedPos, JointSetSpeedPos
+from seed_hand_msgs.msg import JointListSetSpeedPos, JointSetSpeedPos
 
 
 joint_names        = ['r_w_rotation', 'r_w_flexion', 'r_w_adduction',

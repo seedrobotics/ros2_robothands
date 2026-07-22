@@ -18,7 +18,7 @@ import rclpy
 from rclpy.duration import Duration
 from rclpy.node import Node
 
-from seed_robotics.msg import (
+from seed_hand_msgs.msg import (
     AllJoints,
     AllMainBoards,
     JointListSetSpeedPos,

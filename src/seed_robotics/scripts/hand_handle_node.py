@@ -16,7 +16,7 @@ from dynamixel_sdk import (
     COMM_SUCCESS,
     DXL_LOBYTE, DXL_HIBYTE, DXL_LOWORD,
 )
-from seed_robotics.msg import (
+from seed_hand_msgs.msg import (
     AllJoints, AllMainBoards,
     LoneJoint, LoneMainBoard,
     JointListSetSpeedPos,

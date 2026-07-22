@@ -4,7 +4,7 @@
 
 import rclpy
 from rclpy.node import Node
-from seed_robotics.msg import AllJoints
+from seed_hand_msgs.msg import AllJoints
 
 
 class JointsListener(Node):
