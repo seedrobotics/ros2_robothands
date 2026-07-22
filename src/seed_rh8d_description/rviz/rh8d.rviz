@@ -32,7 +32,7 @@ Visualization Manager:
           Force Arrow Scale: 0.01
           Force Color: 204; 51; 51
           Torque Arrow Scale: 0
-          Arrow Width: 0.002
+          Arrow Width: 0.008
           History Length: 1
           Topic:
             Value: /rh8d/right/fingertip/thumb/wrench
@@ -43,7 +43,7 @@ Visualization Manager:
           Force Arrow Scale: 0.01
           Force Color: 51; 102; 204
           Torque Arrow Scale: 0
-          Arrow Width: 0.002
+          Arrow Width: 0.008
           History Length: 1
           Topic:
             Value: /rh8d/right/fingertip/index/wrench
@@ -54,7 +54,7 @@ Visualization Manager:
           Force Arrow Scale: 0.01
           Force Color: 51; 204; 102
           Torque Arrow Scale: 0
-          Arrow Width: 0.002
+          Arrow Width: 0.008
           History Length: 1
           Topic:
             Value: /rh8d/right/fingertip/middle/wrench
@@ -65,7 +65,7 @@ Visualization Manager:
           Force Arrow Scale: 0.01
           Force Color: 230; 153; 51
           Torque Arrow Scale: 0
-          Arrow Width: 0.002
+          Arrow Width: 0.008
           History Length: 1
           Topic:
             Value: /rh8d/right/fingertip/ring/wrench
@@ -76,7 +76,7 @@ Visualization Manager:
           Force Arrow Scale: 0.01
           Force Color: 153; 102; 204
           Torque Arrow Scale: 0
-          Arrow Width: 0.002
+          Arrow Width: 0.008
           History Length: 1
           Topic:
             Value: /rh8d/right/fingertip/little/wrench
@@ -91,7 +91,7 @@ Visualization Manager:
           Force Arrow Scale: 0.01
           Force Color: 204; 51; 51
           Torque Arrow Scale: 0
-          Arrow Width: 0.002
+          Arrow Width: 0.008
           History Length: 1
           Topic:
             Value: /rh8d/left/fingertip/thumb/wrench
@@ -102,7 +102,7 @@ Visualization Manager:
           Force Arrow Scale: 0.01
           Force Color: 51; 102; 204
           Torque Arrow Scale: 0
-          Arrow Width: 0.002
+          Arrow Width: 0.008
           History Length: 1
           Topic:
             Value: /rh8d/left/fingertip/index/wrench
@@ -113,7 +113,7 @@ Visualization Manager:
           Force Arrow Scale: 0.01
           Force Color: 51; 204; 102
           Torque Arrow Scale: 0
-          Arrow Width: 0.002
+          Arrow Width: 0.008
           History Length: 1
           Topic:
             Value: /rh8d/left/fingertip/middle/wrench
@@ -124,7 +124,7 @@ Visualization Manager:
           Force Arrow Scale: 0.01
           Force Color: 230; 153; 51
           Torque Arrow Scale: 0
-          Arrow Width: 0.002
+          Arrow Width: 0.008
           History Length: 1
           Topic:
             Value: /rh8d/left/fingertip/ring/wrench
@@ -135,7 +135,7 @@ Visualization Manager:
           Force Arrow Scale: 0.01
           Force Color: 153; 102; 204
           Torque Arrow Scale: 0
-          Arrow Width: 0.002
+          Arrow Width: 0.008
           History Length: 1
           Topic:
             Value: /rh8d/left/fingertip/little/wrench

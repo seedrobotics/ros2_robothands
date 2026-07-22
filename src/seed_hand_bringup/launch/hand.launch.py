@@ -114,13 +114,17 @@ def setup(context, *args, **kwargs):
                         FindPackageShare('ros2_sensor_pkg'), 'config', f'sensors_{s}.yaml']),
                 }.items(),
             ))
-            # per-finger WrenchStamped on the sim's topic names
+            # per-finger WrenchStamped on the sim's topic names.
+            # axis_map determined empirically on the right hand (arrow points
+            # with the applied force, matching the sim's child_to_parent
+            # convention); assumed identical mounting on the left.
             actions.append(Node(
                 package='seed_hand_bringup',
                 executable='sensor_wrench_adapter',
                 name=f'sensor_wrench_adapter_{s}',
                 output='screen',
-                parameters=[{'side': s}],
+                parameters=[{'side': s,
+                             'axis_map': ['z', '-y', '-x']}],
             ))
 
     if cfg['plot'].lower() == 'true':
