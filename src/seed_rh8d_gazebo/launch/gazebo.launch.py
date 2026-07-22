@@ -13,11 +13,12 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
     side = LaunchConfiguration('side')
     coupling = LaunchConfiguration('finger_coupling')
-    pkg = FindPackageShare('seed_rh8d_description')
+    desc_pkg = FindPackageShare('seed_rh8d_description')
+    sim_pkg = FindPackageShare('seed_rh8d_gazebo')
 
     # rh8d_controllers_<side>[_independent].yaml - the actuated joint set
     # differs per coupling mode.
-    controllers_file = PathJoinSubstitution([pkg, 'config', PythonExpression([
+    controllers_file = PathJoinSubstitution([sim_pkg, 'config', PythonExpression([
         "'rh8d_controllers_' + '", side, "'",
         " + ('_independent' if '", coupling, "' == 'independent' else '')",
         " + '.yaml'"])])
@@ -25,7 +26,7 @@ def generate_launch_description():
     robot_description = ParameterValue(
         Command([
             FindExecutable(name='xacro'), ' ',
-            PathJoinSubstitution([pkg, 'urdf', 'rh8d.urdf.xacro']),
+            PathJoinSubstitution([desc_pkg, 'urdf', 'rh8d.urdf.xacro']),
             ' use_gazebo:=true',
             ' side:=', side,
             ' finger_coupling:=', coupling,
@@ -34,7 +35,7 @@ def generate_launch_description():
         ]),
         value_type=str)
 
-    world = PathJoinSubstitution([pkg, 'worlds', 'rh8d_world.sdf'])
+    world = PathJoinSubstitution([sim_pkg, 'worlds', 'rh8d_world.sdf'])
     gz_args = PythonExpression(
         ["('-s ' if '", LaunchConfiguration('headless'), "' == 'true' else '') + '-r -v1 '"])
 
@@ -59,7 +60,7 @@ def generate_launch_description():
         # Lets gz resolve the model://seed_rh8d_description/... mesh URIs that
         # sdformat generates from the package:// paths.
         AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH',
-                                  PathJoinSubstitution([pkg, '..'])),
+                                  PathJoinSubstitution([desc_pkg, '..'])),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -81,11 +82,11 @@ def generate_launch_description():
         # config_file when any are present (the /clock bridge lives in the yaml).
         Node(package='ros_gz_bridge', executable='parameter_bridge',
              parameters=[{'config_file': PathJoinSubstitution(
-                 [pkg, 'config', PythonExpression(["'gz_bridge_' + '", side, "' + '.yaml'"])])}]),
+                 [sim_pkg, 'config', PythonExpression(["'gz_bridge_' + '", side, "' + '.yaml'"])])}]),
 
         # Real-sensor semantics for the palm IR: single Range value, 0.255 m
         # when nothing is in range (the hardware reports 255, never inf).
-        Node(package='seed_rh8d_description', executable='palm_ir_adapter.py',
+        Node(package='seed_rh8d_gazebo', executable='palm_ir_adapter.py',
              remappings=[('scan', ['/rh8d/', side, '/palm_ir/scan']),
                          ('range', ['/rh8d/', side, '/palm_ir/range'])],
              parameters=[{'use_sim_time': True}]),
@@ -127,7 +128,7 @@ def generate_launch_description():
                   LaunchConfiguration('use_coupling'), "' != 'true') and '",
                   LaunchConfiguration('motor_gui'), "' == 'true'"])),
              parameters=[{'use_sim_time': True}]),
-        Node(package='seed_rh8d_description', executable='joint_gui_to_trajectory.py',
+        Node(package='seed_rh8d_gazebo', executable='joint_gui_to_trajectory.py',
              condition=IfCondition(PythonExpression(
                  ["('", coupling, "' != 'independent' or '",
                   LaunchConfiguration('use_coupling'), "' != 'true') and '",
@@ -135,7 +136,7 @@ def generate_launch_description():
              parameters=[{'use_sim_time': True}]),
 
         Node(package='rviz2', executable='rviz2',
-             arguments=['-d', PathJoinSubstitution([pkg, 'rviz', 'rh8d.rviz'])],
+             arguments=['-d', PathJoinSubstitution([desc_pkg, 'rviz', 'rh8d.rviz'])],
              parameters=[{'use_sim_time': True}],
              condition=IfCondition(LaunchConfiguration('rviz'))),
     ])

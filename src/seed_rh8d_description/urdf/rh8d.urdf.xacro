@@ -16,8 +16,11 @@
   <xacro:arg name="use_gazebo" default="false"/>
   <xacro:arg name="use_ros2_control" default="true"/>
   <xacro:arg name="hardware_plugin" default="mock_components/GenericSystem"/>
-  <xacro:arg name="controllers_file"
-             default="$(find seed_rh8d_description)/config/rh8d_controllers_$(arg side).yaml"/>
+  <!-- No usable default: xacro evaluates arg defaults eagerly, and the sim
+       controller configs live in seed_rh8d_gazebo, which this package must
+       not require. Callers with use_gazebo:=true must pass the real path
+       (gazebo.launch.py does). -->
+  <xacro:arg name="controllers_file" default="controllers_file_not_set.yaml"/>
 
   <xacro:include filename="$(find seed_rh8d_description)/urdf/rh8d_macro.xacro"/>
   <xacro:include filename="$(find seed_rh8d_description)/urdf/rh8d.gazebo.xacro"/>

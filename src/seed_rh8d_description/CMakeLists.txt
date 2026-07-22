@@ -4,15 +4,13 @@ project(seed_rh8d_description)
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY urdf meshes launch rviz config worlds
+  DIRECTORY urdf meshes launch rviz
   DESTINATION share/${PROJECT_NAME}
 )
 
 install(
   PROGRAMS
-    scripts/palm_ir_adapter.py
     scripts/rh8d_coupling_node.py
-    scripts/joint_gui_to_trajectory.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
