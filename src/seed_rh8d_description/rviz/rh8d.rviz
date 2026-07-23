@@ -35,7 +35,7 @@ Visualization Manager:
           Arrow Width: 0.02
           History Length: 1
           Topic:
-            Value: /rh8d/right/fingertip/thumb/wrench
+            Value: /rh8d/right/fingertip/thumb/wrench_display
           Value: true
         - Class: rviz_default_plugins/Wrench
           Enabled: true
@@ -46,7 +46,7 @@ Visualization Manager:
           Arrow Width: 0.02
           History Length: 1
           Topic:
-            Value: /rh8d/right/fingertip/index/wrench
+            Value: /rh8d/right/fingertip/index/wrench_display
           Value: true
         - Class: rviz_default_plugins/Wrench
           Enabled: true
@@ -57,7 +57,7 @@ Visualization Manager:
           Arrow Width: 0.02
           History Length: 1
           Topic:
-            Value: /rh8d/right/fingertip/middle/wrench
+            Value: /rh8d/right/fingertip/middle/wrench_display
           Value: true
         - Class: rviz_default_plugins/Wrench
           Enabled: true
@@ -68,7 +68,7 @@ Visualization Manager:
           Arrow Width: 0.02
           History Length: 1
           Topic:
-            Value: /rh8d/right/fingertip/ring/wrench
+            Value: /rh8d/right/fingertip/ring/wrench_display
           Value: true
         - Class: rviz_default_plugins/Wrench
           Enabled: true
@@ -79,7 +79,7 @@ Visualization Manager:
           Arrow Width: 0.02
           History Length: 1
           Topic:
-            Value: /rh8d/right/fingertip/little/wrench
+            Value: /rh8d/right/fingertip/little/wrench_display
           Value: true
     - Class: rviz_common/Group
       Enabled: true
@@ -94,7 +94,7 @@ Visualization Manager:
           Arrow Width: 0.02
           History Length: 1
           Topic:
-            Value: /rh8d/left/fingertip/thumb/wrench
+            Value: /rh8d/left/fingertip/thumb/wrench_display
           Value: true
         - Class: rviz_default_plugins/Wrench
           Enabled: true
@@ -105,7 +105,7 @@ Visualization Manager:
           Arrow Width: 0.02
           History Length: 1
           Topic:
-            Value: /rh8d/left/fingertip/index/wrench
+            Value: /rh8d/left/fingertip/index/wrench_display
           Value: true
         - Class: rviz_default_plugins/Wrench
           Enabled: true
@@ -116,7 +116,7 @@ Visualization Manager:
           Arrow Width: 0.02
           History Length: 1
           Topic:
-            Value: /rh8d/left/fingertip/middle/wrench
+            Value: /rh8d/left/fingertip/middle/wrench_display
           Value: true
         - Class: rviz_default_plugins/Wrench
           Enabled: true
@@ -127,7 +127,7 @@ Visualization Manager:
           Arrow Width: 0.02
           History Length: 1
           Topic:
-            Value: /rh8d/left/fingertip/ring/wrench
+            Value: /rh8d/left/fingertip/ring/wrench_display
           Value: true
         - Class: rviz_default_plugins/Wrench
           Enabled: true
@@ -138,7 +138,7 @@ Visualization Manager:
           Arrow Width: 0.02
           History Length: 1
           Topic:
-            Value: /rh8d/left/fingertip/little/wrench
+            Value: /rh8d/left/fingertip/little/wrench_display
           Value: true
   Global Options:
     Fixed Frame: base_link

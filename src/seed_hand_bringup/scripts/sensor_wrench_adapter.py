@@ -29,6 +29,13 @@ Processing pipeline (sensor values -> published wrench):
                fingertip y = -sensor x, fingertip z = sensor z.
   3. deadband  |F| < min_force (sensor units) publishes a zero wrench,
                so noise does not draw arrows in RViz. 0 disables.
+
+A second stream .../wrench_display (consumed by the shipped rh8d.rviz)
+additionally clamps physically invalid polarities to 0: clip_raw lists them
+per raw sensor axis, default ['+z'] - the pad only measures compression
+(negative raw z), positive z readings are rubber hysteresis after release.
+The main .../wrench topic keeps those values so plots and analysis see the
+sensor's full behavior.
 """
 import math
 
@@ -42,6 +49,16 @@ from ros2_sensor_pkg.msg import AllSensors
 
 FINGERS = ['thumb', 'index', 'middle', 'ring', 'little']
 AXES = {'x': 0, 'y': 1, 'z': 2}
+
+
+def parse_clip(clip_raw):
+    """['+z', '-x'] -> [(axis_index, invalid_sign), ...]"""
+    clips = []
+    for spec in clip_raw:
+        if len(spec) != 2 or spec[0] not in '+-' or spec[1] not in AXES:
+            raise ValueError(f'bad clip entry "{spec}" (want e.g. "+z")')
+        clips.append((AXES[spec[1]], 1.0 if spec[0] == '+' else -1.0))
+    return clips
 
 
 def parse_axis_map(axis_map):
@@ -64,6 +81,7 @@ class SensorWrenchAdapter(Node):
         self.min_force = self.declare_parameter('min_force', 0.0).value
         self.tare_samples = self.declare_parameter('tare_samples', 25).value
         axis_map = self.declare_parameter('axis_map', ['x', 'y', 'z']).value
+        self.clips = parse_clip(self.declare_parameter('clip_raw', ['+z']).value)
         topic_prefix = {'left': 'L_', 'right': 'R_'}[side]
         jp = side[0] + '_'
 
@@ -76,6 +94,10 @@ class SensorWrenchAdapter(Node):
         self.pub_by_id = {
             i: self.create_publisher(
                 WrenchStamped, f'/rh8d/{side}/fingertip/{f}/wrench', 10)
+            for i, f in enumerate(order)}
+        self.disp_pub_by_id = {
+            i: self.create_publisher(
+                WrenchStamped, f'/rh8d/{side}/fingertip/{f}/wrench_display', 10)
             for i, f in enumerate(order)}
 
         self.bias = {}        # id -> (fx, fy, fz) rest offset in counts
@@ -102,6 +124,11 @@ class SensorWrenchAdapter(Node):
                     return SetParametersResult(
                         successful=False,
                         reason=f'bad axis_map (want e.g. ["y","-x","z"]): {e}')
+            elif p.name == 'clip_raw':
+                try:
+                    self.clips = parse_clip(p.value)
+                except ValueError as e:
+                    return SetParametersResult(successful=False, reason=str(e))
             self.get_logger().info(f'{p.name} -> {p.value}')
         return SetParametersResult(successful=True)
 
@@ -139,23 +166,34 @@ class SensorWrenchAdapter(Node):
             self._accumulate_tare(present)
             return  # publish nothing until the zero level is known
         forces = {}
+        display = {}
         for s in present:
             bias = self.bias.get(s.id, (0.0, 0.0, 0.0))
-            raw = (s.fx - bias[0], s.fy - bias[1], s.fz - bias[2])
+            raw = [s.fx - bias[0], s.fy - bias[1], s.fz - bias[2]]
             f = [sign * raw[src] for src, sign in self.remap]
             if math.hypot(*f) < self.min_force:
                 f = [0.0, 0.0, 0.0]
             forces[s.id] = f
+            # display variant: physically invalid polarities clamped
+            for idx, invalid_sign in self.clips:
+                if raw[idx] * invalid_sign > 0:
+                    raw[idx] = 0.0
+            fd = [sign * raw[src] for src, sign in self.remap]
+            if math.hypot(*fd) < self.min_force:
+                fd = [0.0, 0.0, 0.0]
+            display[s.id] = fd
         # sensors below the firmware's transmit threshold are omitted from
         # the message entirely - publish zeros so arrows drop instead of
         # freezing at the last value
-        for sid, pub in self.pub_by_id.items():
-            w = WrenchStamped()
-            w.header.stamp = msg.header.stamp
-            w.header.frame_id = self.frame_by_id[sid]
-            f = forces.get(sid, (0.0, 0.0, 0.0))
-            w.wrench.force.x, w.wrench.force.y, w.wrench.force.z = f
-            pub.publish(w)
+        for sid in self.pub_by_id:
+            for pubs, vals in ((self.pub_by_id, forces),
+                               (self.disp_pub_by_id, display)):
+                w = WrenchStamped()
+                w.header.stamp = msg.header.stamp
+                w.header.frame_id = self.frame_by_id[sid]
+                f = vals.get(sid, (0.0, 0.0, 0.0))
+                w.wrench.force.x, w.wrench.force.y, w.wrench.force.z = f
+                pubs[sid].publish(w)
 
 
 def main(args=None):
