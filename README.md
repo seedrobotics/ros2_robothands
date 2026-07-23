@@ -98,7 +98,7 @@ applies three steps, each a parameter: auto-**tare** on startup (keep
 fingertips unloaded; re-zero anytime with `ros2 service call
 /sensor_wrench_adapter_right/tare std_srvs/srv/Trigger`), **axis_map** to
 rotate the sensor axes into the fingertip frame (e.g. `['z','-y','x']`),
-and a **min_force** deadband (default 50, sensor units) so noise doesn't
+and a **min_force** deadband (default 10, sensor units) so noise doesn't
 draw arrows. If the sensors are cabled in a different order, adjust
 `finger_order`.
 
