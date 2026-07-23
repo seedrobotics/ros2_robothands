@@ -44,7 +44,8 @@ controller automatically.
 
 - **Fingertip 3D force sensors**: one `force_torque` sensor per fingertip pad
   joint, publishing on gz topics `rh8d/<side>/fingertip/<finger>/wrench`
-  (z = normal force, x/y = shear, in the pad frame).
+  (x = normal force — the pad's thickness axis in the fingertip frame —
+  y/z = shear; verified against the real sensors).
 - **Palm IR distance sensor**: `gpu_lidar` (3–254 mm) on
   `rh8d/<side>/palm_ir/scan`; `palm_ir_adapter.py` (started by
   `gazebo.launch.py`) converts it to a single `sensor_msgs/Range` on

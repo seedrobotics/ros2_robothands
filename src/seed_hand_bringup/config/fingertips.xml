@@ -4,18 +4,7 @@
   <Tab tab_name="fingertips right" containers="1">
    <Container>
     <DockSplitter orientation="-" count="3" sizes="0.34;0.33;0.33">
-     <DockArea name="normal force fz">
-      <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
-       <range left="0" right="10" top="100" bottom="-100"/>
-       <limitY/>
-       <curve color="#1f77b4" name="/rh8d/right/fingertip/thumb/wrench/wrench/force/z"/>
-       <curve color="#d62728" name="/rh8d/right/fingertip/index/wrench/wrench/force/z"/>
-       <curve color="#2ca02c" name="/rh8d/right/fingertip/middle/wrench/wrench/force/z"/>
-       <curve color="#ff7f0e" name="/rh8d/right/fingertip/ring/wrench/wrench/force/z"/>
-       <curve color="#9467bd" name="/rh8d/right/fingertip/little/wrench/wrench/force/z"/>
-      </plot>
-     </DockArea>
-     <DockArea name="shear fx">
+     <DockArea name="normal force fx">
       <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
        <range left="0" right="10" top="100" bottom="-100"/>
        <limitY/>
@@ -35,6 +24,17 @@
        <curve color="#2ca02c" name="/rh8d/right/fingertip/middle/wrench/wrench/force/y"/>
        <curve color="#ff7f0e" name="/rh8d/right/fingertip/ring/wrench/wrench/force/y"/>
        <curve color="#9467bd" name="/rh8d/right/fingertip/little/wrench/wrench/force/y"/>
+      </plot>
+     </DockArea>
+     <DockArea name="shear fz">
+      <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+       <range left="0" right="10" top="100" bottom="-100"/>
+       <limitY/>
+       <curve color="#1f77b4" name="/rh8d/right/fingertip/thumb/wrench/wrench/force/z"/>
+       <curve color="#d62728" name="/rh8d/right/fingertip/index/wrench/wrench/force/z"/>
+       <curve color="#2ca02c" name="/rh8d/right/fingertip/middle/wrench/wrench/force/z"/>
+       <curve color="#ff7f0e" name="/rh8d/right/fingertip/ring/wrench/wrench/force/z"/>
+       <curve color="#9467bd" name="/rh8d/right/fingertip/little/wrench/wrench/force/z"/>
       </plot>
      </DockArea>
     </DockSplitter>
