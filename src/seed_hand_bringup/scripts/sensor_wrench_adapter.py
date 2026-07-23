@@ -31,6 +31,10 @@ Processing pipeline (raw counts -> published wrench):
                along the pad normal).
   4. deadband  |F| < min_force (published units) publishes a zero wrench,
                so noise does not draw arrows in RViz. 0 disables.
+
+Alongside, /rh8d/<side>/fingertip/<finger>/wrench_raw carries the untouched
+sensor counts in sensor axes (no tare/scale/remap/deadband, published even
+while taring) - use these for plotting and for calibrating force_scale.
 """
 import math
 
@@ -79,6 +83,10 @@ class SensorWrenchAdapter(Node):
         self.pub_by_id = {
             i: self.create_publisher(
                 WrenchStamped, f'/rh8d/{side}/fingertip/{f}/wrench', 10)
+            for i, f in enumerate(order)}
+        self.raw_pub_by_id = {
+            i: self.create_publisher(
+                WrenchStamped, f'/rh8d/{side}/fingertip/{f}/wrench_raw', 10)
             for i, f in enumerate(order)}
 
         self.bias = {}        # id -> (fx, fy, fz) rest offset in counts
@@ -141,6 +149,14 @@ class SensorWrenchAdapter(Node):
     def on_sensors(self, msg):
         present = [s for s in msg.data
                    if s.is_present and s.id in self.pub_by_id]
+        for s in present:  # untouched counts, also while taring
+            w = WrenchStamped()
+            w.header.stamp = msg.header.stamp
+            w.header.frame_id = self.frame_by_id[s.id]
+            w.wrench.force.x = float(s.fx)
+            w.wrench.force.y = float(s.fy)
+            w.wrench.force.z = float(s.fz)
+            self.raw_pub_by_id[s.id].publish(w)
         if self._taring:
             self._accumulate_tare(present)
             return  # publish nothing until the zero level is known

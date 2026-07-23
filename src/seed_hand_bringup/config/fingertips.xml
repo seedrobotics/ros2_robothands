@@ -8,33 +8,33 @@
       <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
        <range left="0" right="10" top="100" bottom="-100"/>
        <limitY/>
-       <curve color="#1f77b4" name="/rh8d/right/fingertip/thumb/wrench/wrench/force/z"/>
-       <curve color="#d62728" name="/rh8d/right/fingertip/index/wrench/wrench/force/z"/>
-       <curve color="#2ca02c" name="/rh8d/right/fingertip/middle/wrench/wrench/force/z"/>
-       <curve color="#ff7f0e" name="/rh8d/right/fingertip/ring/wrench/wrench/force/z"/>
-       <curve color="#9467bd" name="/rh8d/right/fingertip/little/wrench/wrench/force/z"/>
+       <curve color="#1f77b4" name="/rh8d/right/fingertip/thumb/wrench_raw/wrench/force/z"/>
+       <curve color="#d62728" name="/rh8d/right/fingertip/index/wrench_raw/wrench/force/z"/>
+       <curve color="#2ca02c" name="/rh8d/right/fingertip/middle/wrench_raw/wrench/force/z"/>
+       <curve color="#ff7f0e" name="/rh8d/right/fingertip/ring/wrench_raw/wrench/force/z"/>
+       <curve color="#9467bd" name="/rh8d/right/fingertip/little/wrench_raw/wrench/force/z"/>
       </plot>
      </DockArea>
      <DockArea name="shear fx">
       <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
        <range left="0" right="10" top="100" bottom="-100"/>
        <limitY/>
-       <curve color="#1f77b4" name="/rh8d/right/fingertip/thumb/wrench/wrench/force/x"/>
-       <curve color="#d62728" name="/rh8d/right/fingertip/index/wrench/wrench/force/x"/>
-       <curve color="#2ca02c" name="/rh8d/right/fingertip/middle/wrench/wrench/force/x"/>
-       <curve color="#ff7f0e" name="/rh8d/right/fingertip/ring/wrench/wrench/force/x"/>
-       <curve color="#9467bd" name="/rh8d/right/fingertip/little/wrench/wrench/force/x"/>
+       <curve color="#1f77b4" name="/rh8d/right/fingertip/thumb/wrench_raw/wrench/force/x"/>
+       <curve color="#d62728" name="/rh8d/right/fingertip/index/wrench_raw/wrench/force/x"/>
+       <curve color="#2ca02c" name="/rh8d/right/fingertip/middle/wrench_raw/wrench/force/x"/>
+       <curve color="#ff7f0e" name="/rh8d/right/fingertip/ring/wrench_raw/wrench/force/x"/>
+       <curve color="#9467bd" name="/rh8d/right/fingertip/little/wrench_raw/wrench/force/x"/>
       </plot>
      </DockArea>
      <DockArea name="shear fy">
       <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
        <range left="0" right="10" top="100" bottom="-100"/>
        <limitY/>
-       <curve color="#1f77b4" name="/rh8d/right/fingertip/thumb/wrench/wrench/force/y"/>
-       <curve color="#d62728" name="/rh8d/right/fingertip/index/wrench/wrench/force/y"/>
-       <curve color="#2ca02c" name="/rh8d/right/fingertip/middle/wrench/wrench/force/y"/>
-       <curve color="#ff7f0e" name="/rh8d/right/fingertip/ring/wrench/wrench/force/y"/>
-       <curve color="#9467bd" name="/rh8d/right/fingertip/little/wrench/wrench/force/y"/>
+       <curve color="#1f77b4" name="/rh8d/right/fingertip/thumb/wrench_raw/wrench/force/y"/>
+       <curve color="#d62728" name="/rh8d/right/fingertip/index/wrench_raw/wrench/force/y"/>
+       <curve color="#2ca02c" name="/rh8d/right/fingertip/middle/wrench_raw/wrench/force/y"/>
+       <curve color="#ff7f0e" name="/rh8d/right/fingertip/ring/wrench_raw/wrench/force/y"/>
+       <curve color="#9467bd" name="/rh8d/right/fingertip/little/wrench_raw/wrench/force/y"/>
       </plot>
      </DockArea>
     </DockSplitter>
@@ -51,7 +51,7 @@
    <max_array_size value="100"/>
    <boolean_strings_to_number value="true"/>
    <remove_suffix_from_strings value="true"/>
-   <selected_topics value="/rh8d/right/fingertip/thumb/wrench;/rh8d/right/fingertip/index/wrench;/rh8d/right/fingertip/middle/wrench;/rh8d/right/fingertip/ring/wrench;/rh8d/right/fingertip/little/wrench"/>
+   <selected_topics value="/rh8d/right/fingertip/thumb/wrench_raw;/rh8d/right/fingertip/index/wrench_raw;/rh8d/right/fingertip/middle/wrench_raw;/rh8d/right/fingertip/ring/wrench_raw;/rh8d/right/fingertip/little/wrench_raw"/>
   </plugin>
  </Plugins>
  <previouslyLoaded_Streamer name="ROS2 Topic Subscriber"/>
