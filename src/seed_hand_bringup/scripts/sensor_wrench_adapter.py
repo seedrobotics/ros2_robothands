@@ -138,17 +138,24 @@ class SensorWrenchAdapter(Node):
         if self._taring:
             self._accumulate_tare(present)
             return  # publish nothing until the zero level is known
+        forces = {}
         for s in present:
             bias = self.bias.get(s.id, (0.0, 0.0, 0.0))
             raw = (s.fx - bias[0], s.fy - bias[1], s.fz - bias[2])
             f = [sign * raw[src] for src, sign in self.remap]
             if math.hypot(*f) < self.min_force:
                 f = [0.0, 0.0, 0.0]
+            forces[s.id] = f
+        # sensors below the firmware's transmit threshold are omitted from
+        # the message entirely - publish zeros so arrows drop instead of
+        # freezing at the last value
+        for sid, pub in self.pub_by_id.items():
             w = WrenchStamped()
             w.header.stamp = msg.header.stamp
-            w.header.frame_id = self.frame_by_id[s.id]
+            w.header.frame_id = self.frame_by_id[sid]
+            f = forces.get(sid, (0.0, 0.0, 0.0))
             w.wrench.force.x, w.wrench.force.y, w.wrench.force.z = f
-            self.pub_by_id[s.id].publish(w)
+            pub.publish(w)
 
 
 def main(args=None):

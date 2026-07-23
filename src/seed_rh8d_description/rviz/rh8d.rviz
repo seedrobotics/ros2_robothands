@@ -13,7 +13,6 @@ Visualization Manager:
       Plane Cell Count: 10
       Value: true
     - Class: rviz_default_plugins/RobotModel
-      Alpha: 0.7
       Description Source: Topic
       Description Topic:
         Value: /robot_description
