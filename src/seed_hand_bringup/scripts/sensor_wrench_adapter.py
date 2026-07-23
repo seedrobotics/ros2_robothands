@@ -34,7 +34,9 @@ Processing pipeline (raw counts -> published wrench):
 
 Alongside, /rh8d/<side>/fingertip/<finger>/wrench_raw carries the untouched
 sensor counts in sensor axes (no tare/scale/remap/deadband, published even
-while taring) - use these for plotting and for calibrating force_scale.
+while taring) - use these for plotting during force_scale calibration and
+for debugging. publish_raw:=false turns the raw stream off once the scaled
+topic is calibrated.
 """
 import math
 
@@ -70,6 +72,7 @@ class SensorWrenchAdapter(Node):
         self.scale = self.declare_parameter('force_scale', 0.01).value
         self.min_force = self.declare_parameter('min_force', 0.5).value
         self.tare_samples = self.declare_parameter('tare_samples', 25).value
+        self.publish_raw = self.declare_parameter('publish_raw', True).value
         axis_map = self.declare_parameter('axis_map', ['x', 'y', 'z']).value
         topic_prefix = {'left': 'L_', 'right': 'R_'}[side]
         jp = side[0] + '_'
@@ -149,7 +152,8 @@ class SensorWrenchAdapter(Node):
     def on_sensors(self, msg):
         present = [s for s in msg.data
                    if s.is_present and s.id in self.pub_by_id]
-        for s in present:  # untouched counts, also while taring
+        for s in present if self.publish_raw else []:
+            # untouched counts, also while taring
             w = WrenchStamped()
             w.header.stamp = msg.header.stamp
             w.header.frame_id = self.frame_by_id[s.id]
