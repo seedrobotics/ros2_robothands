@@ -15,6 +15,10 @@ use_sensors:=true, starts one sensor node per hand (rviz/motor_gui support
 single sides only). Serial ports must be set in the driver and sensor YAML
 configs first. For visualization on a separate machine use view.launch.py.
 """
+import os
+import tempfile
+
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
                             LogInfo, OpaqueFunction)
@@ -128,10 +132,21 @@ def setup(context, *args, **kwargs):
             ))
 
     if cfg['plot'].lower() == 'true':
+        # the shipped layout is written for the right hand; derive the left
+        # variant by rewriting the topic side (side:=both plots the right)
+        layout = os.path.join(get_package_share_directory('seed_hand_bringup'),
+                              'config', 'fingertips.xml')
+        if side == 'left':
+            left_layout = os.path.join(tempfile.gettempdir(),
+                                       'seed_fingertips_left.xml')
+            with open(layout) as f:
+                xml = f.read().replace('right', 'left')
+            with open(left_layout, 'w') as f:
+                f.write(xml)
+            layout = left_layout
         actions.append(Node(
             package='plotjuggler', executable='plotjuggler',
-            arguments=['-n', '-l', PathJoinSubstitution([
-                FindPackageShare('seed_hand_bringup'), 'config', 'fingertips.xml'])],
+            arguments=['-n', '-l', layout],
         ))
 
     return actions
