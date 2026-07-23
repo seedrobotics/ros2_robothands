@@ -61,7 +61,7 @@ class SensorWrenchAdapter(Node):
         super().__init__('sensor_wrench_adapter')
         side = self.declare_parameter('side', 'right').value
         order = self.declare_parameter('finger_order', FINGERS).value
-        self.min_force = self.declare_parameter('min_force', 10.0).value
+        self.min_force = self.declare_parameter('min_force', 0.0).value
         self.tare_samples = self.declare_parameter('tare_samples', 25).value
         axis_map = self.declare_parameter('axis_map', ['x', 'y', 'z']).value
         topic_prefix = {'left': 'L_', 'right': 'R_'}[side]
