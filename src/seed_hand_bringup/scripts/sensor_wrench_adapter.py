@@ -14,29 +14,21 @@ Sensors are matched by their id field (wire index), not array position - the
 driver omits absent sensors from the array. finger_order maps wire index ->
 finger name; adjust it if the sensors are cabled differently.
 
-Processing pipeline (raw counts -> published wrench):
+Values are published in the sensor's own (factory-calibrated) units.
+Arrow length in RViz is a display concern - tune Force Arrow Scale in
+rh8d.rviz, not here.
+
+Processing pipeline (sensor values -> published wrench):
   1. tare      subtract the per-sensor rest bias. Auto-tared from the first
                tare_samples messages after startup (keep the fingertips
                unloaded!); re-zero anytime:
                    ros2 service call /sensor_wrench_adapter_right/tare \
                        std_srvs/srv/Trigger
-  2. scale     force_scale converts counts to the published unit. The
-               default 0.01 roughly lands typical counts near the newton
-               range the sim publishes; replace with the measured
-               counts-per-newton factor once calibrated.
-  3. remap     axis_map rotates the sensor axes into the fingertip frame,
+  2. remap     axis_map rotates the sensor axes into the fingertip frame,
                e.g. ['y', '-x', 'z'] means: fingertip x = sensor y,
-               fingertip y = -sensor x, fingertip z = sensor z. Determine
-               empirically (press straight on a pad, make the arrow point
-               along the pad normal).
-  4. deadband  |F| < min_force (published units) publishes a zero wrench,
+               fingertip y = -sensor x, fingertip z = sensor z.
+  3. deadband  |F| < min_force (sensor units) publishes a zero wrench,
                so noise does not draw arrows in RViz. 0 disables.
-
-Alongside, /rh8d/<side>/fingertip/<finger>/wrench_raw carries the untouched
-sensor counts in sensor axes (no tare/scale/remap/deadband, published even
-while taring) - use these for plotting during force_scale calibration and
-for debugging. publish_raw:=false turns the raw stream off once the scaled
-topic is calibrated.
 """
 import math
 
@@ -69,16 +61,14 @@ class SensorWrenchAdapter(Node):
         super().__init__('sensor_wrench_adapter')
         side = self.declare_parameter('side', 'right').value
         order = self.declare_parameter('finger_order', FINGERS).value
-        self.scale = self.declare_parameter('force_scale', 0.01).value
-        self.min_force = self.declare_parameter('min_force', 0.5).value
+        self.min_force = self.declare_parameter('min_force', 50.0).value
         self.tare_samples = self.declare_parameter('tare_samples', 25).value
-        self.publish_raw = self.declare_parameter('publish_raw', True).value
         axis_map = self.declare_parameter('axis_map', ['x', 'y', 'z']).value
         topic_prefix = {'left': 'L_', 'right': 'R_'}[side]
         jp = side[0] + '_'
 
         self.remap = parse_axis_map(axis_map)
-        # force_scale, min_force and axis_map are live-tunable:
+        # min_force and axis_map are live-tunable:
         #   ros2 param set /sensor_wrench_adapter_right axis_map "['y','-x','z']"
         self.add_on_set_parameters_callback(self.on_set_params)
 
@@ -86,10 +76,6 @@ class SensorWrenchAdapter(Node):
         self.pub_by_id = {
             i: self.create_publisher(
                 WrenchStamped, f'/rh8d/{side}/fingertip/{f}/wrench', 10)
-            for i, f in enumerate(order)}
-        self.raw_pub_by_id = {
-            i: self.create_publisher(
-                WrenchStamped, f'/rh8d/{side}/fingertip/{f}/wrench_raw', 10)
             for i, f in enumerate(order)}
 
         self.bias = {}        # id -> (fx, fy, fz) rest offset in counts
@@ -101,16 +87,13 @@ class SensorWrenchAdapter(Node):
         self.create_service(Trigger, '~/tare', self.on_tare)
         self.get_logger().info(
             f'publishing /rh8d/{side}/fingertip/<finger>/wrench for {order} '
-            f'(force_scale={self.scale} [rough default, not calibrated], '
-            f'min_force={self.min_force}, axis_map={axis_map}, '
+            f'(min_force={self.min_force}, axis_map={axis_map}, '
             f'auto-taring over first {self.tare_samples} samples - keep '
             'fingertips unloaded)')
 
     def on_set_params(self, params):
         for p in params:
-            if p.name == 'force_scale':
-                self.scale = float(p.value)
-            elif p.name == 'min_force':
+            if p.name == 'min_force':
                 self.min_force = float(p.value)
             elif p.name == 'axis_map':
                 try:
@@ -152,23 +135,12 @@ class SensorWrenchAdapter(Node):
     def on_sensors(self, msg):
         present = [s for s in msg.data
                    if s.is_present and s.id in self.pub_by_id]
-        for s in present if self.publish_raw else []:
-            # untouched counts, also while taring
-            w = WrenchStamped()
-            w.header.stamp = msg.header.stamp
-            w.header.frame_id = self.frame_by_id[s.id]
-            w.wrench.force.x = float(s.fx)
-            w.wrench.force.y = float(s.fy)
-            w.wrench.force.z = float(s.fz)
-            self.raw_pub_by_id[s.id].publish(w)
         if self._taring:
             self._accumulate_tare(present)
             return  # publish nothing until the zero level is known
         for s in present:
             bias = self.bias.get(s.id, (0.0, 0.0, 0.0))
-            raw = ((s.fx - bias[0]) * self.scale,
-                   (s.fy - bias[1]) * self.scale,
-                   (s.fz - bias[2]) * self.scale)
+            raw = (s.fx - bias[0], s.fy - bias[1], s.fz - bias[2])
             f = [sign * raw[src] for src, sign in self.remap]
             if math.hypot(*f) < self.min_force:
                 f = [0.0, 0.0, 0.0]
