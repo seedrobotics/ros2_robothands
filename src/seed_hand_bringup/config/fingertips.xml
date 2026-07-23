@@ -43,7 +43,7 @@
   <currentTabIndex index="0"/>
  </tabbed_widget>
  <use_relative_time_offset enabled="1"/>
- <!-- prompt to start the ROS 2 live subscriber when the layout loads -->
+ <!-- start the ROS 2 live subscriber on the wrench topics when loading -->
  <Plugins>
   <plugin ID="ROS2 Topic Subscriber">
    <use_header_stamp value="false"/>
@@ -51,6 +51,7 @@
    <max_array_size value="100"/>
    <boolean_strings_to_number value="true"/>
    <remove_suffix_from_strings value="true"/>
+   <selected_topics value="/rh8d/right/fingertip/thumb/wrench;/rh8d/right/fingertip/index/wrench;/rh8d/right/fingertip/middle/wrench;/rh8d/right/fingertip/ring/wrench;/rh8d/right/fingertip/little/wrench"/>
   </plugin>
  </Plugins>
  <previouslyLoaded_Streamer name="ROS2 Topic Subscriber"/>

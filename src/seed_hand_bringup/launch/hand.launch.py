@@ -124,7 +124,7 @@ def setup(context, *args, **kwargs):
                 name=f'sensor_wrench_adapter_{s}',
                 output='screen',
                 parameters=[{'side': s,
-                             'axis_map': ['z', '-y', '-x']}],
+                             'axis_map': ['z', '-y', 'x']}],
             ))
 
     if cfg['plot'].lower() == 'true':
