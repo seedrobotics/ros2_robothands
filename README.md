@@ -20,9 +20,10 @@ Tested with ROS 2 Jazzy on Ubuntu 24.04.
 | `seed_rh8d_description` | URDF/xacro model of the RH8D (left and right), meshes, RViz visualization |
 | `seed_rh8d_gazebo` | Gazebo (gz-sim) simulation: world, ros2_control configs, sim helper nodes |
 | `dynamixel_sdk` | Bundled ROBOTIS Dynamixel SDK Python bindings (the apt package is C++ only) |
+| `rokoko_glove_control` | Teleoperation from a Rokoko Smartglove: reads the hand solver, publishes `motor_commands` |
 
-`seed_rh8d_description` and `seed_rh8d_gazebo` have their own READMEs with
-model and simulation details.
+`seed_rh8d_description`, `seed_rh8d_gazebo` and `rokoko_glove_control` have
+their own READMEs with model, simulation and glove details.
 
 ## Installation
 
@@ -158,6 +159,52 @@ centered and command that pose as soon as the panel opens.
 The legacy tick-based topics below remain unchanged and can be used in
 parallel.
 
+## Glove teleoperation
+
+`rokoko_glove_control` drives the hand from a Rokoko Smartglove. It reads
+solved poses straight from Rokoko's hand solver and publishes them on
+`motor_commands`, so it drives the real hand and the simulation through the
+same topic as everything else — no UDP hop, and the tick calibration below
+applies to it unchanged.
+
+```bash
+~/.local/share/rokoko-device-sdk/bin/rkk-hand-solver     # first, in its own terminal
+
+ros2 launch seed_hand_bringup hand.launch.py side:=right          # or gazebo.launch.py
+ros2 launch rokoko_glove_control glove.launch.py side:=right
+```
+
+The glove's own open/fist calibration is separate from the hand's tick
+calibration and matters just as much — without it the fingers never reach
+either end of travel:
+
+```bash
+ros2 run rokoko_glove_control glove_calibrate     # four poses, ~1 s each
+```
+
+It writes `rh8d_calibration.json` beside the glove modules, which is where
+the node looks by default — no argument needed. `calibration_file:=` points
+it elsewhere.
+
+Wrist rotation is taken from the **forearm**, not the wrist: pronation and
+supination happen between the forearm bones, so the wrist's own axial twist
+covers only a fraction of the travel. It is tared at startup — hold your
+forearm neutral as the node comes up, and restart it to re-zero.
+
+Useful arguments: `lock_wrist:=true` follows the fingers only,
+`wrist_scale:=` damps the wrist, and `max_range_per_second:=` bounds how fast
+a command may cross an axis (default 3.0, i.e. full travel in a third of a
+second; 0 disables it).
+
+> **CAUTION on hardware**: the hand goes to wherever your hand is as soon as
+> the glove is seen. The node publishes nothing until a pose arrives and slew
+> limits what it does publish, but it still moves to your pose — so start with
+> your hand somewhere sane.
+
+See [src/rokoko_glove_control/README.md](src/rokoko_glove_control/README.md)
+for the channel semantics, the axis directions, and why wrist rotation is
+taken from the forearm.
+
 ## Driver topics
 
 All topic names carry the configured prefix (`R_` below). Message structures:
@@ -184,6 +231,18 @@ All topic names carry the configured prefix (`R_` below). Message structures:
 Joints are addressed by name (or numeric ID) as defined in the config's
 `joint_mapping`.
 
+**These topics also exist in simulation.** `gazebo.launch.py` starts
+`driver_interface` by default (`driver_interface:=false` to skip), the mirror
+of `aligned_interface`: it publishes `<prefix>Joints` / `<prefix>Main_Boards`
+and accepts `<prefix>speed_position`, `stiffness`, `clear_error` and
+`shutdown_condition` in tick units, with the same motor names and bus IDs as
+the driver config. So the user samples below, and any existing tick-based
+code, run against Gazebo unchanged. Both nodes read the same
+`calib.<axis>.tick_min` / `tick_max` parameters, so one calibration serves
+both. See
+[src/seed_rh8d_gazebo/README.md](src/seed_rh8d_gazebo/README.md#driver-native-interface)
+for what is faithful and what is modelled.
+
 ## Examples
 
 Runnable scripts in `src/seed_hand_driver/user_samples/` (`_L` variants for
@@ -194,6 +253,46 @@ the left hand):
 - `user_sample_7_RH8D_R_grab_object.py` — autonomous grab: watches the palm
   IR sensor, closes on an object, stops fingers on current threshold, holds,
   releases
+
+## Tests
+
+```bash
+colcon test --packages-select \
+    seed_rh8d_description seed_rh8d_gazebo seed_hand_bringup \
+    rokoko_glove_control
+colcon test-result --all --verbose
+```
+
+(The two vendored packages are skipped on purpose: `dynamixel_sdk` ships no
+tests, and `ros2_sensor_pkg` is a submodule carrying its own upstream lint
+results — neither says anything about this workspace.)
+
+That covers the URDF (expanded and validated for every side/coupling
+combination), the tendon coupling model, `driver_interface` and
+`sensor_wrench_adapter` against faked inputs, the round trip between
+`aligned_interface` and `driver_interface`, the glove channel mapping against
+synthetic poses, and every launch file resolved across its argument
+combinations. It takes about 90 s and starts the real
+nodes as subprocesses — nothing is mocked.
+
+The Gazebo integration tests drive the physics simulation and take minutes
+each, so they are opt-in:
+
+```bash
+colcon build --cmake-args -DSEED_SIM_TESTS=ON
+colcon test --packages-select seed_rh8d_gazebo
+```
+
+Each test also runs on its own, which is the quickest way to reproduce a
+problem:
+
+```bash
+python3 src/seed_rh8d_gazebo/test/test_sim_joint_limits.py mimic left
+```
+
+Tests take a DDS domain of their own (88 upwards, `RH8D_TEST_DOMAIN_BASE` to
+move them), so they will not disturb a hand or a simulation you already have
+running.
 
 ## Troubleshooting
 

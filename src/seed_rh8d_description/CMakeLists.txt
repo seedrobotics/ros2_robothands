@@ -22,6 +22,14 @@ if(BUILD_TESTING)
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     GENERATE_RESULT_FOR_RETURN_CODE_ZERO
   )
+  foreach(test_name coupling_node launch_files)
+    ament_add_test(${test_name}
+      COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/test/test_${test_name}.py"
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+      TIMEOUT 600
+      GENERATE_RESULT_FOR_RETURN_CODE_ZERO
+    )
+  endforeach()
 endif()
 
 ament_package()

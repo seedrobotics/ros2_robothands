@@ -83,6 +83,17 @@ and the shipped command paths (coupling node, GUI bridge) clamp targets
 (MoveIt, grasp planners, teleop) bypasses this** — clamp your targets the
 same way, or a goal ending exactly at a limit can freeze that joint in sim.
 
+A clamped target is **not sufficient on its own**: a joint given a large step
+can *overshoot* into its limit on the way and pin there, even though the
+command it was chasing sat well inside the range. Damping is what prevents
+that, so **every revolute joint needs a `<dynamics damping=...>`** — an
+undamped one will eventually lock up in normal use. `wrist_rotation_joint`
+was missing it and pinned after an ordinary ~2 rad step; the third protection
+is therefore that all revolute joints carry damping.
+`seed_rh8d_gazebo/test/test_sim_joint_limits.py` is the regression test for
+this, and steps the axes across their range to provoke exactly that
+overshoot.
+
 ## Tuning knobs (current values are sim-snappy, not hardware-calibrated)
 
 | What | Where | Value |

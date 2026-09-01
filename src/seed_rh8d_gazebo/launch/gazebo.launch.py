@@ -56,6 +56,11 @@ def generate_launch_description():
                                           'commanding the sim via the coupling '
                                           'controller (independent mode)'),
         DeclareLaunchArgument('rviz', default_value='false'),
+        DeclareLaunchArgument('driver_interface', default_value='true',
+                              description='Expose the driver\'s native '
+                                          'tick interface (<L_|R_>Joints, '
+                                          '<L_|R_>speed_position, ...) on '
+                                          'the simulation'),
 
         # Lets gz resolve the model://seed_rh8d_description/... mesh URIs that
         # sdformat generates from the package:// paths.
@@ -134,6 +139,31 @@ def generate_launch_description():
                   LaunchConfiguration('use_coupling'), "' != 'true') and '",
                   LaunchConfiguration('motor_gui'), "' == 'true'"])),
              parameters=[{'use_sim_time': True}]),
+
+        # Driver-native interface: the same topics, message types, motor
+        # names and tick units as seed_hand_driver, so hardware code runs
+        # unchanged against the sim. The mirror of the driver's
+        # aligned_interface, which does the same in the other direction.
+        # In independent mode it feeds the coupling node's motor axes; in
+        # mimic mode it commands the trajectory controller directly.
+        Node(package='seed_rh8d_gazebo', executable='driver_interface.py',
+             name='hand_driver_interface',
+             output='screen',
+             condition=IfCondition(PythonExpression(
+                 ["'", LaunchConfiguration('driver_interface'), "' == 'true' and ",
+                  "('", coupling, "' != 'independent' or '",
+                  LaunchConfiguration('use_coupling'), "' == 'true')"])),
+             parameters=[{
+                 'topic_prefix': PythonExpression(
+                     ["'L_' if '", side, "' == 'left' else 'R_'"]),
+                 'joint_prefix': PythonExpression(
+                     ["'l_' if '", side, "' == 'left' else 'r_'"]),
+                 'base_id': PythonExpression(
+                     ["40 if '", side, "' == 'left' else 30"]),
+                 'finger_coupling': coupling,
+                 'couple_ring_little': LaunchConfiguration('couple_ring_little'),
+                 'use_sim_time': True}],
+             remappings=[('palm_ir/range', ['/rh8d/', side, '/palm_ir/range'])]),
 
         Node(package='rviz2', executable='rviz2',
              arguments=['-d', PathJoinSubstitution([desc_pkg, 'rviz', 'rh8d.rviz'])],

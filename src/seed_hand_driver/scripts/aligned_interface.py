@@ -7,12 +7,12 @@ real hand unchanged. Purely additive: the native R_/L_ topics keep working.
 
 Units (matching rh8d_coupling_node with normalized_fingers:=true):
   flexion axes    closure fraction, 0.0 open .. 1.0 closed
-  wrist axes and thumb abduction    radians
+  wrist axes and thumb adduction    radians
 
 Interface
   in:  motor_commands (sensor_msgs/JointState) - motor-axis names
        (<jp>{thumb,index,middle}_flexion_joint, <jp>ring_little_flexion_joint,
-       <jp>wrist_{rotation,adduction,flexion}_joint, <jp>thumb_abduction_joint;
+       <jp>wrist_{rotation,adduction,flexion}_joint, <jp>thumb_adduction_joint;
        jp = joint_prefix). Optional velocity entries are converted with
        speed_scale (ignored when speed_scale is 0).
   in:  hand_controller/joint_trajectory (trajectory_msgs/JointTrajectory) -
@@ -42,7 +42,7 @@ PASSTHROUGH = {  # axis -> (rad_min, rad_max)
     'wrist_rotation_joint': (-1.5708, 1.5708),
     'wrist_adduction_joint': (-0.7854, 0.7854),
     'wrist_flexion_joint': (-0.7854, 0.7854),
-    'thumb_abduction_joint': (-0.6, 0.7854),
+    'thumb_adduction_joint': (-0.6, 0.7854),
 }
 # flexion axis -> phalanx chains it drives: (joint suffix, upper limit)
 _finger = lambda f: [(f'{f}_proximal_joint', 1.57),

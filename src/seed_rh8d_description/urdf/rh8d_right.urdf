@@ -118,7 +118,7 @@
       <inertia ixx="1e-06" ixy="0.0" ixz="0.0" iyy="1e-06" iyz="0.0" izz="1e-06"/>
     </inertial>
   </link>
-  <joint name="r_thumb_abduction_joint" type="revolute">
+  <joint name="r_thumb_adduction_joint" type="revolute">
     <origin rpy="-2.54680616 -0.60124514 0.33418237" xyz="-0.0083412575 0.0157859987 0.0379541955"/>
     <parent link="r_palm"/>
     <child link="r_thumb_base"/>

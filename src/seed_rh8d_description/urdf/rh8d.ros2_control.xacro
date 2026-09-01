@@ -53,7 +53,7 @@
       <xacro:rh8d_joint_iface joint="${prefix}wrist_rotation_joint"/>
       <xacro:rh8d_joint_iface joint="${prefix}wrist_adduction_joint"/>
       <xacro:rh8d_joint_iface joint="${prefix}wrist_flexion_joint"/>
-      <xacro:rh8d_joint_iface joint="${prefix}thumb_abduction_joint"/>
+      <xacro:rh8d_joint_iface joint="${prefix}thumb_adduction_joint"/>
 
       <xacro:if value="${finger_coupling == 'mimic'}">
         <xacro:rh8d_joint_iface joint="${prefix}thumb_proximal_joint"/>

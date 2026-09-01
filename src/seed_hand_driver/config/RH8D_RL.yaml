@@ -11,7 +11,7 @@ hand_handle_node:
       r_wrist_rotation_joint: 31
       r_wrist_adduction_joint: 32
       r_wrist_flexion_joint: 33
-      r_thumb_abduction_joint: 34
+      r_thumb_adduction_joint: 34
       r_thumb_flexion_joint: 35
       r_index_flexion_joint: 36
       r_middle_flexion_joint: 37
@@ -20,7 +20,7 @@ hand_handle_node:
       l_wrist_rotation_joint: 41
       l_wrist_adduction_joint: 42
       l_wrist_flexion_joint: 43
-      l_thumb_abduction_joint: 44
+      l_thumb_adduction_joint: 44
       l_thumb_flexion_joint: 45
       l_index_flexion_joint: 46
       l_middle_flexion_joint: 47

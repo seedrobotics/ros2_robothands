@@ -18,7 +18,7 @@ Interface
        <prefix>ring_little_flexion_joint (or separate ring/little when
        couple_ring_little:=false), plus the pass-through axes
        <prefix>wrist_{rotation,adduction,flexion}_joint and
-       <prefix>thumb_abduction_joint.
+       <prefix>thumb_adduction_joint.
        Units (normalized_fingers:=true, the default): flexion axes take a
        closure fraction 0 (open) .. 1 (closed); pass-through axes take
        radians. This matches the real-hand aligned interface in
@@ -86,7 +86,7 @@ class CouplingNode(Node):
             f'{p}wrist_rotation_joint': (-1.5708, 1.5708),
             f'{p}wrist_adduction_joint': (-0.7854, 0.7854),
             f'{p}wrist_flexion_joint': (-0.7854, 0.7854),
-            f'{p}thumb_abduction_joint': (-0.6, 0.7854),
+            f'{p}thumb_adduction_joint': (-0.6, 0.7854),
         }
         # full tendon travel of each flexion axis (limit margins excluded) -
         # the scale of a normalized 0..1 command

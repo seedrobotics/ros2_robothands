@@ -16,7 +16,7 @@ hand_controller:
       - r_wrist_rotation_joint
       - r_wrist_adduction_joint
       - r_wrist_flexion_joint
-      - r_thumb_abduction_joint
+      - r_thumb_adduction_joint
       - r_thumb_proximal_joint
       - r_index_proximal_joint
       - r_middle_proximal_joint

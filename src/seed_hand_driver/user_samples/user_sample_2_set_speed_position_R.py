@@ -7,7 +7,7 @@ from seed_hand_msgs.msg import JointListSetSpeedPos, JointSetSpeedPos
 
 
 joint_names        = ['r_wrist_rotation_joint', 'r_wrist_flexion_joint', 'r_wrist_adduction_joint',
-                      'r_thumb_abduction_joint', 'r_thumb_flexion_joint',
+                      'r_thumb_adduction_joint', 'r_thumb_flexion_joint',
                       'r_index_flexion_joint', 'r_middle_flexion_joint', 'r_ring_little_flexion_joint']
 target_positions   = [1000, 2048, 2000, 0, 0, 0, 0, 0]
 target_speeds      = [0, 100, 200, 300, 400, 500, 0, 0]

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>rokoko_glove_control</name>
+  <version>0.1.0</version>
+  <description>
+    Teleoperate a Seed Robotics RH8D from a Rokoko Smartglove. Reads solved
+    hand poses from the Rokoko hand solver over RGMP and publishes them on
+    the workspace's aligned interface (motor_commands), so the glove drives
+    the real hand and the Gazebo simulation through the same topic.
+  </description>
+  <maintainer email="lennart@seedrobotics.com">Lennart</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+
+  <!-- The Rokoko hand solver (rkk-hand-solver, from the Rokoko device SDK)
+       must be running; it is not a ROS package and cannot be a dependency
+       here. rgmp_client.py, the wire protocol it speaks, is vendored. -->
+
+  <test_depend>ament_cmake_test</test_depend>
+  <test_depend>seed_rh8d_description</test_depend>
+  <test_depend>xacro</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -17,7 +17,6 @@
   <author email="thlim@robotis.com">Darby Lim</author>
   <author>Leon</author>
 
-  <buildtool_depend>ament_python</buildtool_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>python3-serial</exec_depend>
 

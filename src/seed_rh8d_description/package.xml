@@ -22,12 +22,15 @@
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>trajectory_msgs</exec_depend>
 
   <!-- Simulation (only needed when spawning with use_gazebo:=true):
        gz_ros2_control, ros_gz_sim, ros_gz_bridge. Kept out of the hard
        dependency list so the description stays lightweight. -->
 
   <test_depend>liburdfdom-tools</test_depend>
+  <test_depend>ament_cmake_test</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

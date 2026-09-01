@@ -178,7 +178,7 @@
     <xacro:property name="prox_joint" value="${prefix}thumb_proximal_joint"/>
     <xacro:property name="mimic_base" value="${leader if leader != '' else prox_joint}"/>
 
-    <joint name="${prefix}thumb_abduction_joint" type="revolute">
+    <joint name="${prefix}thumb_adduction_joint" type="revolute">
       <origin rpy="${mount_rpy}" xyz="${mount_xyz}"/>
       <parent link="${prefix}palm"/>
       <child link="${prefix}thumb_base"/>

@@ -47,7 +47,7 @@ class GrabObjectNode(Node):
         self.joint_list = [LoneJoint() for _ in range(5)]
 
         self.names_step_1 = [
-            'l_thumb_abduction_joint',
+            'l_thumb_adduction_joint',
             'l_index_flexion_joint',
             'l_middle_flexion_joint',
             'l_ring_little_flexion_joint',
@@ -60,7 +60,7 @@ class GrabObjectNode(Node):
         self.target_speeds_step_2 = [50]
 
         self.names_step_3 = [
-            'l_thumb_abduction_joint',
+            'l_thumb_adduction_joint',
             'l_thumb_flexion_joint',
             'l_index_flexion_joint',
             'l_middle_flexion_joint',
@@ -91,7 +91,7 @@ class GrabObjectNode(Node):
 
     def joints_callback(self, joints_data):
         for joint in joints_data.joints:
-            if joint.name == 'l_thumb_abduction_joint':
+            if joint.name == 'l_thumb_adduction_joint':
                 self.joint_list[0] = joint
             if joint.name == 'l_thumb_flexion_joint':
                 self.joint_list[1] = joint

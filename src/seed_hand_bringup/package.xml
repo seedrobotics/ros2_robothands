@@ -17,6 +17,8 @@
   <exec_depend>ros2_sensor_pkg</exec_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>rcl_interfaces</exec_depend>
   <exec_depend>plotjuggler_ros</exec_depend>
   <exec_depend>seed_rh8d_description</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
@@ -25,6 +27,8 @@
   <exec_depend>xacro</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
+
+  <test_depend>ament_cmake_test</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

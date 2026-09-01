@@ -32,6 +32,10 @@
       <child link="${prefix}forearm"/>
       <axis xyz="0 0 1"/>
       <limit effort="10" lower="${-pi/2}" upper="${pi/2}" velocity="6"/>
+      <!-- Without damping a large step command overshoots into the joint
+           limit, where dartsim pins the joint permanently (the other two
+           wrist axes have carried damping="1" from the start). -->
+      <dynamics damping="1" friction="0.0"/>
     </joint>
     <link name="${prefix}forearm">
       <inertial>

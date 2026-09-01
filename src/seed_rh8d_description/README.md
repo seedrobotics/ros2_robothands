@@ -56,7 +56,7 @@ The real RH8D has 8 actuators. Actuated joints (prefix `l_`/`r_`):
 | Wrist rotation | `*_wrist_rotation_joint` |
 | Wrist adduction | `*_wrist_adduction_joint` |
 | Wrist flexion | `*_wrist_flexion_joint` |
-| Thumb abduction | `*_thumb_abduction_joint` |
+| Thumb adduction | `*_thumb_adduction_joint` |
 | Thumb flexion | `*_thumb_{proximal,medial,distal}_joint` |
 | Index flexion | `*_index_{proximal,medial,distal}_joint` |
 | Middle flexion | `*_middle_{proximal,medial,distal}_joint` |
