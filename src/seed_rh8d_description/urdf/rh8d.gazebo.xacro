@@ -55,6 +55,12 @@
     <gazebo>
       <plugin filename="gz-sim-joint-state-publisher-system"
               name="gz::sim::systems::JointStatePublisher"/>
+      <!-- Self-collision is a MODEL-level switch in gz-sim: the per-link
+           <self_collide> below is not what turns it on, and without this the
+           thumb sweeps straight through a closed fist. Links joined by a
+           joint are still exempt, so the phalanx chains do not fight their
+           own neighbours. -->
+      <self_collide>true</self_collide>
     </gazebo>
 
     <xacro:rh8d_link_friction link="${prefix}forearm"/>

@@ -222,6 +222,16 @@
         </geometry>
         <material name="rh8d_black"/>
       </visual>
+      <!-- Slimmer than thumb_medial's, and kept to the distal half of the
+           link: the thumb mount is calibrated per side rather than mirrored,
+           so a volume sized like the medial one clears the palm on the right
+           and sits inside it on the left, jamming the abduction axis. -->
+      <collision>
+        <origin rpy="${pi/2} 0 0" xyz="0 -0.015 0"/>
+        <geometry>
+          <cylinder length="0.010" radius="0.0050"/>
+        </geometry>
+      </collision>
     </link>
 
     <joint name="${prefix}thumb_medial_joint" type="revolute">

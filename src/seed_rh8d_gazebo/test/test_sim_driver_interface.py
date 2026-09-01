@@ -151,22 +151,42 @@ def run():
                             f'({p.joint("middle_proximal_joint"):.3f} rad)')
 
             check.section('all eight axes at once')
+            # The thumb is kept out of the way: closed across the fingers it
+            # now collides with them, so this stays a free-motion check.
             p.command({'wrist_rotation_joint': 2048, 'wrist_flexion_joint': 2048,
-                       'wrist_adduction_joint': 2048, 'thumb_adduction_joint': 4095,
-                       'thumb_flexion_joint': 4095, 'index_flexion_joint': 4095,
+                       'wrist_adduction_joint': 2048, 'thumb_adduction_joint': 0,
+                       'thumb_flexion_joint': 0, 'index_flexion_joint': 4095,
                        'middle_flexion_joint': 4095, 'ring_little_flexion_joint': 4095})
+            curled = ('index', 'middle', 'ring', 'little')
             fist = p.wait_until(
-                lambda: all(p.joint(f + '_proximal_joint') > 0.6 for f in FINGERS),
-                40, 'a full fist')
+                lambda: all(p.joint(f + '_proximal_joint') > 0.6 for f in curled),
+                40, 'the four fingers to curl')
             p.spin(2.0)
-            check(fist, 'a single command to all 8 axes produces a full fist: '
+            check(fist, 'one command curls all four fingers: '
                         + ', '.join(f'{f}={p.joint(f + "_proximal_joint"):.2f}'
-                                    for f in FINGERS))
+                                    for f in curled))
             currents = {n.replace(p.jp, ''): j.current for n, j in p.motors.items()}
             check.info(f'modelled currents: {currents}')
             check(all(abs(c) < 400 for c in currents.values()),
                   f'modelled current stays low in free motion '
                   f'(max {max(abs(c) for c in currents.values())} mA)')
+
+            check.section('self-collision')
+            # Closing the thumb across the curled fingers is a contact now: it
+            # must stall short of where it reaches in free space, and the
+            # blocked axes must show that in the modelled current.
+            p.command({'thumb_adduction_joint': 4095, 'thumb_flexion_joint': 4095})
+            p.spin(12.0)
+            thumb = p.joint('thumb_proximal_joint')
+            blocked = max(abs(j.current) for n, j in p.motors.items()
+                          if 'thumb' in n or 'index' in n)
+            check.info(f'thumb proximal {thumb:.2f} rad against the fingers, '
+                       f'peak current on the blocked axes {blocked} mA')
+            check(thumb < 0.70,
+                  f'the curled fingers stop the thumb short of the 0.77 rad it '
+                  f'reaches in free space ({thumb:.2f})')
+            check(blocked > 400,
+                  f'and the contact shows up as motor current ({blocked} mA)')
             check(set(j.moving for j in p.motors.values()) <= {0, 1},
                   'the moving flag is boolean')
         finally:

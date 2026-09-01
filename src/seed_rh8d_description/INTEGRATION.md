@@ -94,6 +94,31 @@ is therefore that all revolute joints carry damping.
 this, and steps the axes across their range to provoke exactly that
 overshoot.
 
+## Self-collision
+
+The hand collides with itself: a thumb closed across curled fingers stops on
+them instead of passing through, and the block shows up as motor current in
+`driver_interface`'s model (~1400 mA against ~60 mA in free motion).
+
+It is switched on **at the model level** — `<self_collide>true</self_collide>`
+inside the bare `<gazebo>` block in `rh8d.gazebo.xacro`. The per-link
+`<self_collide>` tags in `rh8d_link_friction` are *not* what enables it; with
+only those set, the thumb sweeps straight through a closed fist. Links joined
+by a joint stay exempt, so the phalanx chains do not fight their neighbours.
+
+**Collision volumes near the palm are per-side.** The thumb abduction mount is
+calibrated separately for each hand rather than mirrored, so a volume that
+clears the palm on the right can sit inside it on the left — where it jams the
+abduction axis solid rather than merely blocking it. `thumb_proximal`'s
+collision is deliberately slimmer than `thumb_medial`'s and confined to the
+distal half of the link for exactly this reason. If you add collision geometry
+anywhere near the palm, check both sides: drive the axis to both ends and
+confirm it reaches them.
+
+Five links carry no collision geometry on purpose: `base_link`, `r_tool0` and
+`r_palm_ir` are virtual frames, and `palm_axis` and `thumb_base` are enclosed
+by the palm.
+
 ## Tuning knobs (current values are sim-snappy, not hardware-calibrated)
 
 | What | Where | Value |
